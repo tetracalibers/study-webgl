@@ -1,5 +1,7 @@
 'use strict'
 
+import { utils } from '../common/js/utils.js'
+
 /** @type {WebGL2RenderingContext | null} */
 let gl = null
 
@@ -47,23 +49,8 @@ const checkKey = (event) => {
 }
 
 const init = () => {
-  /** @type {HTMLCanvasElement | null} */
-  const canvas = document.getElementById('webgl-canvas')
-
-  // canvasの存在を確認
-  if (!canvas) {
-    console.error('Sorry! No HTML5 Canvas was found on this page.')
-    return
-  }
-
-  gl = canvas.getContext('webgl2')
-
-  // コンテキストの存在を確認
-  const message = gl
-    ? 'Hooray! You got a WebGL2 context'
-    : 'Sorry! WebGL is not available'
-
-  alert(message)
+  const canvas = utils.getCanvas('webgl-canvas')
+  gl = utils.getGLContext(canvas)
 
   window.onkeydown = checkKey
 }
