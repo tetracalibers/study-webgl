@@ -1,0 +1,14 @@
+{
+  "name": "first-webgl-2",
+  "private": true,
+  "scripts": {
+    "serve": "node server.js"
+  },
+  "devDependencies": {
+    "connect": "^3.7.0",
+    "glob": "^8.1.0",
+    "jsdom": "^21.1.0",
+    "lodash": "^4.17.21",
+    "serve-static": "^1.15.0"
+  }
+}
