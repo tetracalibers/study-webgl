@@ -239,8 +239,7 @@ const init = () => {
   const canvas = utils.getCanvas('webgl-canvas')
 
   // canvasをスクリーンと同じサイズに設定
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
+  utils.autoResizeCanvas(canvas)
 
   // WebGLコンテキストを取得
   gl = utils.getGLContext(canvas)

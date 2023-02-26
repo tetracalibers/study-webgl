@@ -30,6 +30,20 @@ const getGLContext = (canvas) => {
 }
 
 /**
+ * ウィンドウが変更されると自動的にリサイズされるように設定する関数
+ * @param {HTMLCanvasElement} canvas
+ */
+const autoResizeCanvas = (canvas) => {
+  const expandFullScreen = () => {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
+  expandFullScreen()
+  const observer = new ResizeObserver(expandFullScreen)
+  observer.observe(document.body)
+}
+
+/**
  * lil-guiによるGUIコントロール作成
  * @param {*} settings
  * @param {*} [options={ width: 300 }]
@@ -88,5 +102,6 @@ const configureControls = (settings, options = { width: 300 }) => {
 export const utils = {
   getCanvas,
   getGLContext,
+  autoResizeCanvas,
   configureControls,
 }
