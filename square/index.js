@@ -3,11 +3,8 @@ import { utils } from '../common/js/utils.js'
 /** @type {WebGL2RenderingContext | null} */
 let gl = null
 
-/**
- * 頂点バッファオブジェクト（VBO）
- * @type {WebGLBuffer | null}
- */
-let squareVertexBuffer = null
+/** @type {WebGLVertexArrayObject | null} */
+let squareVAO = null
 
 /**
  * インデックスバッファオブジェクト（IBO）
@@ -119,7 +116,12 @@ const initBuffers = () => {
     0, 2, 3  // V0, V2, V3 を結ぶ三角形
   ]
 
-  squareVertexBuffer = gl.createBuffer()
+  // VAOインスタンス作成
+  squareVAO = gl.createVertexArray()
+  // バインド
+  gl.bindVertexArray(squareVAO)
+
+  const squareVertexBuffer = gl.createBuffer()
   // バッファをバインド
   // bindBuffer(バッファの種類, バッファ)
   // ARRAY_BUFFER = 頂点データ
@@ -128,6 +130,17 @@ const initBuffers = () => {
   // bufferData(バッファの種類, 値, 使用法)
   // STATIC_DRAW = バッファのデータは変更されない（一度設定し、何度も利用される）
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+
+  // draw内で後ほどデータを使用するためにVAOの命令を実行
+  gl.enableVertexAttribArray(program.aVertexPosition)
+  // アトリビュートをバインドされているVBOに関連付ける
+  // vertexAttribPointer(index, size, type, normalize, stride, offset)
+  // - size ... バインドされているバッファに保存されている頂点ごとの値の数
+  // - type ... バッファに保存されている値のデータ型
+  // - normalize ... 数値変換するか
+  // - stride ... 0なら要素がバッファに順番に保存されていることを示す
+  // - offset ... 対応するアトリビュートのために値を読み取り始めるバッファ内の位置
+  gl.vertexAttribPointer(program.aVertexPosition, 3, gl.FLOAT, false, 0, 0)
 
   squareIndexBuffer = gl.createBuffer()
   // ELEMENT_ARRAY_BUFFER = インデックスデータ
@@ -139,6 +152,7 @@ const initBuffers = () => {
   )
 
   // バッファを使い終えたらバインドを解除
+  gl.bindVertexArray(null)
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
 }
@@ -151,18 +165,8 @@ const draw = () => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
 
-  // VBOをバインド
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer)
-  // アトリビュートをバインドされているVBOに関連付ける
-  // vertexAttribPointer(index, size, type, normalize, stride, offset)
-  // - size ... バインドされているバッファに保存されている頂点ごとの値の数
-  // - type ... バッファに保存されている値のデータ型
-  // - normalize ... 数値変換するか
-  // - stride ... 0なら要素がバッファに順番に保存されていることを示す
-  // - offset ... 対応するアトリビュートのために値を読み取り始めるバッファ内の位置
-  gl.vertexAttribPointer(program.aVertexPosition, 3, gl.FLOAT, false, 0, 0)
-  // アトリビュートの有効化
-  gl.enableVertexAttribArray(program.aVertexPosition)
+  // VAOをバインド
+  gl.bindVertexArray(squareVAO)
 
   // IBOをバインド
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer)
@@ -176,6 +180,7 @@ const draw = () => {
   gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0)
 
   // 利用が終わったバッファはバインドを解除
+  gl.bindVertexArray(null)
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
 }
