@@ -69,6 +69,7 @@ const loadShader = async (gl, filePath) => {
   // シェーダーに問題がないことを確認
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     console.error(gl.getShaderInfoLog(shader))
+    gl.deleteShader(shader)
     return null
   }
 
@@ -111,6 +112,7 @@ const getShader = (gl, id) => {
   // シェーダーに問題がないことを確認
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     console.error(gl.getShaderInfoLog(shader))
+    gl.deleteShader(shader)
     return null
   }
 
