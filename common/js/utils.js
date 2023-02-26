@@ -43,6 +43,38 @@ const autoResizeCanvas = (canvas) => {
   observer.observe(document.body)
 }
 
+const loadShader = async (gl, filePath) => {
+  const response = await fetch(filePath)
+  const shaderString = await response.text()
+
+  /** @type {WebGLShader | null} */
+  let shader
+
+  const fileExt = filePath.split('.').at(-1)
+  switch (fileExt) {
+    case 'frag':
+      shader = gl.createShader(gl.FRAGMENT_SHADER)
+      break
+    case 'vert':
+      shader = gl.createShader(gl.VERTEX_SHADER)
+      break
+    default:
+      return null
+  }
+
+  // 与えられたシェーダーコードを使用してシェーダーをコンパイル
+  gl.shaderSource(shader, shaderString)
+  gl.compileShader(shader)
+
+  // シェーダーに問題がないことを確認
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(shader))
+    return null
+  }
+
+  return shader
+}
+
 /**
  * 与えられたidを使用してDOMからシェーダースクリプトの内容を取り出し、
  * コンパイルされたシェーダーを返す関数
@@ -145,6 +177,7 @@ export const utils = {
   getCanvas,
   getGLContext,
   autoResizeCanvas,
+  loadShader,
   getShader,
   configureControls,
 }
