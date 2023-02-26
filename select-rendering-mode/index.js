@@ -28,50 +28,11 @@ let program = null
 let renderingMode = 'TRIANGLES'
 
 /**
- * 与えられたidを使用してDOMからシェーダースクリプトの内容を取り出し、
- * コンパイルされたシェーダーを返す関数
- * @param {string} id
- * @return {WebGLShader | null}
- */
-const getShader = (id) => {
-  /** @type {HTMLScriptElement | null} */
-  const script = document.getElementById(id)
-  const shaderString = script.text.trim()
-
-  /** @type {WebGLShader | null} */
-  let shader
-
-  // シェーダーのタイプに応じたシェーダーを代入
-  switch (script.type) {
-    case 'x-shader/x-vertex':
-      shader = gl.createShader(gl.VERTEX_SHADER)
-      break
-    case 'x-shader/x-fragment':
-      shader = gl.createShader(gl.FRAGMENT_SHADER)
-      break
-    default:
-      return null
-  }
-
-  // 与えられたシェーダーコードを使用してシェーダーをコンパイル
-  gl.shaderSource(shader, shaderString)
-  gl.compileShader(shader)
-
-  // シェーダーに問題がないことを確認
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(shader))
-    return null
-  }
-
-  return shader
-}
-
-/**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
  */
 const initProgram = () => {
-  const vertexShader = getShader('vertex-shader')
-  const fragmentShader = getShader('fragment-shader')
+  const vertexShader = utils.getShader(gl, 'vertex-shader')
+  const fragmentShader = utils.getShader(gl, 'fragment-shader')
 
   // プログラムを作成
   program = gl.createProgram()

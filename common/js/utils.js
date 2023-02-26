@@ -44,6 +44,48 @@ const autoResizeCanvas = (canvas) => {
 }
 
 /**
+ * 与えられたidを使用してDOMからシェーダースクリプトの内容を取り出し、
+ * コンパイルされたシェーダーを返す関数
+ * @param {WebGL2RenderingContext} gl
+ * @param {string} id
+ * @return {WebGLShader | null}
+ */
+const getShader = (gl, id) => {
+  /** @type {HTMLScriptElement | null} */
+  const script = document.getElementById(id)
+  if (!script) return null
+
+  const shaderString = script.text.trim()
+
+  /** @type {WebGLShader | null} */
+  let shader
+
+  // シェーダーのタイプに応じたシェーダーを代入
+  switch (script.type) {
+    case 'x-shader/x-vertex':
+      shader = gl.createShader(gl.VERTEX_SHADER)
+      break
+    case 'x-shader/x-fragment':
+      shader = gl.createShader(gl.FRAGMENT_SHADER)
+      break
+    default:
+      return null
+  }
+
+  // 与えられたシェーダーコードを使用してシェーダーをコンパイル
+  gl.shaderSource(shader, shaderString)
+  gl.compileShader(shader)
+
+  // シェーダーに問題がないことを確認
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(shader))
+    return null
+  }
+
+  return shader
+}
+
+/**
  * lil-guiによるGUIコントロール作成
  * @param {*} settings
  * @param {*} [options={ width: 300 }]
@@ -103,5 +145,6 @@ export const utils = {
   getCanvas,
   getGLContext,
   autoResizeCanvas,
+  getShader,
   configureControls,
 }
