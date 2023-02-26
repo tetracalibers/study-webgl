@@ -208,6 +208,30 @@ const draw = () => {
 }
 
 /**
+ * GUIコントロール初期化関数
+ */
+const initControls = () => {
+  utils.configureControls({
+    'Rendering Mode': {
+      value: renderingMode,
+      options: [
+        'TRIANGLES',
+        'TRIANGLE_STRIP',
+        'TRIANGLE_FAN',
+        'LINES',
+        'LINE_LOOP',
+        'LINE_STRIP',
+        'POINTS',
+      ],
+      onChange: (v) => {
+        renderingMode = v
+        draw()
+      },
+    },
+  })
+}
+
+/**
  * アプリケーションの初期化関数
  */
 const init = () => {
@@ -227,6 +251,8 @@ const init = () => {
   initProgram()
   initBuffers()
   draw()
+
+  initControls()
 }
 
 window.onload = init
