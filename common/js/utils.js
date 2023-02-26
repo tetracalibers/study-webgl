@@ -120,6 +120,29 @@ const getShader = (gl, id) => {
 }
 
 /**
+ * プログラムを作成し、返す関数
+ * @param {WebGL2RenderingContext} gl
+ * @param {WebGLShader} vertexShader
+ * @param {WebGLShader} fragmentShader
+ */
+const getProgram = (gl, vertexShader, fragmentShader) => {
+  // プログラムを作成
+  const program = gl.createProgram()
+  // このプログラムをシェーダーにアタッチ
+  gl.attachShader(program, vertexShader)
+  gl.attachShader(program, fragmentShader)
+  gl.linkProgram(program)
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Could not initialize shaders')
+    gl.deleteProgram(program)
+    return null
+  }
+
+  return program
+}
+
+/**
  * lil-guiによるGUIコントロール作成
  * @param {*} settings
  * @param {*} [options={ width: 300 }]
@@ -181,5 +204,6 @@ export const utils = {
   autoResizeCanvas,
   loadShader,
   getShader,
+  getProgram,
   configureControls,
 }

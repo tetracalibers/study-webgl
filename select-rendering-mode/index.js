@@ -35,15 +35,7 @@ const initProgram = () => {
   const fragmentShader = utils.getShader(gl, 'fragment-shader')
 
   // プログラムを作成
-  program = gl.createProgram()
-  // このプログラムをシェーダーにアタッチ
-  gl.attachShader(program, vertexShader)
-  gl.attachShader(program, fragmentShader)
-  gl.linkProgram(program)
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error('Could not initialize shaders')
-  }
+  program = utils.getProgram(gl, vertexShader, fragmentShader)
 
   // プログラムインスタンスを使用
   gl.useProgram(program)
