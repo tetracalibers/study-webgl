@@ -169,6 +169,14 @@ const draw = () => {
 }
 
 /**
+ * 再描画ループのコールバック
+ */
+const render = () => {
+  requestAnimationFrame(render)
+  draw()
+}
+
+/**
  * GUIコントロール初期化関数
  */
 const initControls = () => {
@@ -184,10 +192,7 @@ const initControls = () => {
         'LINE_STRIP',
         'POINTS',
       ],
-      onChange: (v) => {
-        renderingMode = v
-        draw()
-      },
+      onChange: (v) => (renderingMode = v),
     },
   })
 }
@@ -210,7 +215,7 @@ const init = () => {
   // 適切な順序で関数を呼び出す
   initProgram()
   initBuffers()
-  draw()
+  render()
 
   initControls()
 }
