@@ -15,7 +15,8 @@ void main() {
   // これを二倍してスクリーンサイズを引き、それに対してさらにスクリーンサイズによる除算を行う
   vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);
   
-  float t = 0.02 / abs(sin(u_time - length(p)));
+  float t = atan(p.y, p.x) + u_time;
+  t = sin(t * 10.0);
   
   outColor = vec4(vec3(t), 1.0);
 }
