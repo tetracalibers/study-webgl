@@ -1,4 +1,5 @@
 // @see https://thebookofshaders.com/03/?lan=jp
+// @see https://wgld.org/d/glsl/g001.html
 
 import { utils } from '../common/js/utils.js'
 
@@ -69,6 +70,8 @@ const initBuffers = () => {
  * canvasに描画する関数
  */
 const draw = () => {
+  // ミリ秒単位の時間をそのまま渡すと非常に大きな数字になってしまうため、
+  // 千分の一にしてシェーダに送る
   const time = (new Date().getTime() - startTime) * 0.001
   gl.uniform1f(program.uTime, time)
 
