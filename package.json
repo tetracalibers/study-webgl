@@ -2,7 +2,8 @@
   "name": "first-webgl-2",
   "private": true,
   "scripts": {
-    "serve": "node server.js"
+    "serve": "node server.js",
+    "compile:matrix": "tsc --target es2022 --outDir common/js -d common/ts/matrix.ts"
   },
   "devDependencies": {
     "connect": "^3.7.0",
