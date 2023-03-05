@@ -105,12 +105,14 @@ const getShader = (gl, id) => {
       return null
   }
 
-  // 与えられたシェーダーコードを使用してシェーダーをコンパイル
+  // 生成されたシェーダにソースを割り当てる
   gl.shaderSource(shader, shaderString)
+  // シェーダをコンパイルする
   gl.compileShader(shader)
 
-  // シェーダーに問題がないことを確認
+  // シェーダが正しくコンパイルされたかチェック
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    // 失敗していたら通知し、削除
     console.error(gl.getShaderInfoLog(shader))
     gl.deleteShader(shader)
     return null
@@ -128,12 +130,15 @@ const getShader = (gl, id) => {
 const getProgram = (gl, vertexShader, fragmentShader) => {
   // プログラムを作成
   const program = gl.createProgram()
-  // このプログラムをシェーダーにアタッチ
+  // プログラムオブジェクトにシェーダを割り当てる
   gl.attachShader(program, vertexShader)
   gl.attachShader(program, fragmentShader)
+  // シェーダをリンク
   gl.linkProgram(program)
 
+  // シェーダのリンクが正しく行なわれたかチェック
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    // 失敗していたら通知し、削除
     console.error('Could not initialize shaders')
     gl.deleteProgram(program)
     return null
