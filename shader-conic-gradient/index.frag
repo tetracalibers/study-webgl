@@ -17,8 +17,7 @@ void main() {
   
   vec2 v = vec2(0.0, 1.0);
   
-  // 内積による線形グラデーション
-  float t = dot(p, v);
+  float t = dot(p, v) / (length(p) * length(v));
   
   outColor = vec4(vec3(t), 1.0);
 }
