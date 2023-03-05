@@ -1,4 +1,5 @@
 // @see https://thebookofshaders.com/03/?lan=jp
+// @see https://wgld.org/d/glsl/g001.html
 
 import { utils } from '../common/js/utils.js'
 
