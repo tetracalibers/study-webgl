@@ -143,6 +143,57 @@ const getProgram = (gl, vertexShader, fragmentShader) => {
 }
 
 /**
+ * VBOを作成し、返す関数
+ *
+ * @param {WebGL2RenderingContext} gl
+ * @param {number[]} vertices
+ * @return {WebGLBuffer | null}
+ */
+const getVBO = (gl, vertices) => {
+  // バッファオブジェクトの生成
+  const vbo = gl.createBuffer()
+
+  // バッファをバインドする
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+
+  // バッファにデータをセット
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+
+  // バッファのバインドを無効化
+  gl.bindBuffer(gl.ARRAY_BUFFER, null)
+
+  // 生成した VBO を返して終了
+  return vbo
+}
+
+/**
+ * IBOを生成し、返す関数
+ * @param {WebGL2RenderingContext} gl
+ * @param {number[]} indices
+ * @return {WebGLBuffer | null}
+ */
+const getIBO = (gl, indices) => {
+  // バッファオブジェクトの生成
+  const ibo = gl.createBuffer()
+
+  // バッファをバインドする
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
+
+  // バッファにデータをセット
+  gl.bufferData(
+    gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(indices),
+    gl.STATIC_DRAW
+  )
+
+  // バッファのバインドを無効化
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+
+  // 生成したIBOを返して終了
+  return ibo
+}
+
+/**
  * lil-guiによるGUIコントロール作成
  * @param {*} settings
  * @param {*} [options={ width: 300 }]
@@ -205,5 +256,7 @@ export const utils = {
   loadShader,
   getShader,
   getProgram,
+  getVBO,
+  getIBO,
   configureControls,
 }
