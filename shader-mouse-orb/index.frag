@@ -19,10 +19,14 @@ void main() {
   // これを二倍してスクリーンサイズを引き、それに対してさらにスクリーンサイズによる除算を行う
   vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);
   
-  // length(m - p) = マウス座標と処理ピクセル間の距離
-  // 30.0 = 輪と輪の距離を制御
-  // 5.0 = アニメーション速度を制御
-  float t = sin(30.0 * distance(p, m) + u_time * 5.0);
+  // マウス座標と処理ピクセル間の距離
+  float t = distance(m, p);
+  // 色を反転させる
+  t = 1.0 - t;
+  // 強く光る中心部分を広げる
+  t = 0.1 + t;
+  // 5乗して中央から周囲へ溢れる光を弱める
+  t = pow(t, 5.0);
   
   outColor = vec4(vec3(t), 1.0);
 }
