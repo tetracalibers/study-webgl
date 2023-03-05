@@ -8,8 +8,8 @@ let gl = null
 let vao = null
 /** @type {WebGLProgram | null} */
 let program = null
-/** @type {number} */
-let startTime = 0.0
+/** @type {[number, number]} */
+let resolution = [0, 0]
 
 /**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
@@ -21,9 +21,7 @@ const initProgram = async () => {
   program = utils.getProgram(gl, vertexShader, fragmentShader)
 
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
-  program.uTime = gl.getUniformLocation(program, 'u_time')
-
-  startTime = new Date().getTime()
+  program.uResolution = gl.getUniformLocation(program, 'u_resolution')
 
   gl.useProgram(program)
 }
@@ -69,8 +67,7 @@ const initBuffers = () => {
  * canvasに描画する関数
  */
 const draw = () => {
-  const time = (new Date().getTime() - startTime) * 0.001
-  gl.uniform1f(program.uTime, time)
+  gl.uniform2fv(program.uResolution, resolution)
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
@@ -100,6 +97,7 @@ const render = () => {
  */
 const init = async () => {
   const canvas = utils.getCanvas('webgl-canvas')
+  resolution = [canvas.width, canvas.height]
 
   utils.autoResizeCanvas(canvas)
 
