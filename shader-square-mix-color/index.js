@@ -1,4 +1,4 @@
-// @see https://thebookofshaders.com/03/?lan=jp
+// @see https://thebookofshaders.com/06/?lan=jp
 
 import { utils } from '../common/js/utils.js'
 
