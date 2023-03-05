@@ -19,14 +19,7 @@ void main() {
   // これを二倍してスクリーンサイズを引き、それに対してさらにスクリーンサイズによる除算を行う
   vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);
   
-  // マウス座標と処理ピクセル間の距離
-  float t = distance(m, p);
-  // 色を反転させる
-  t = 1.0 - t;
-  // 強く光る中心部分を広げる
-  t = 0.1 + t;
-  // 5乗して中央から周囲へ溢れる光を弱める
-  t = pow(t, 5.0);
+  float t = 0.1 / distance(m, p);
   
   outColor = vec4(vec3(t), 1.0);
 }
