@@ -15,9 +15,7 @@ void main() {
   // これを二倍してスクリーンサイズを引き、それに対してさらにスクリーンサイズによる除算を行う
   vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);
   
-  // 0.5 から減算する処理を用いることによって、
-  // スクリーンの中心(原点)から、正負は関係なく純粋に距離が0.5となる場所ほど数値が小さくなる
-  float t = 0.02 / abs(0.5 - length(p));
+  float t = 0.02 / abs(sin(u_time - length(p)));
   
   outColor = vec4(vec3(t), 1.0);
 }
