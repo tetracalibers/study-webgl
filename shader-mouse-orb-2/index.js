@@ -1,5 +1,4 @@
-// @see https://wgld.org/d/glsl/g001.html
-// @see https://wgld.org/d/glsl/g002.html
+// @see https://wgld.org/d/glsl/g003.html
 
 import { utils } from '../common/js/utils.js'
 
