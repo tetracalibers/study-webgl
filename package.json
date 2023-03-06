@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "serve": "node server.js",
-    "compile:matrix": "tsc --target es2022 --outDir common/js -d common/ts/matrix.ts"
+    "compile:ts": "tsc --target es2022 --outDir common/js/dist -d common/ts/index.ts"
   },
   "devDependencies": {
     "connect": "^3.7.0",
