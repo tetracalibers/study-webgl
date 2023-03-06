@@ -117,6 +117,38 @@ export class Matrix4 {
     return this.multiply2(this.#mat, mat2)
   }
 
+  scale(x: number = 1, y: number = 1, z: number = 1) {
+    let result = this.#mat
+
+    result[0] *= x
+    result[1] *= x
+    result[2] *= x
+
+    result[3] *= y
+    result[4] *= y
+    result[5] *= y
+
+    result[6] *= z
+    result[7] *= z
+    result[8] *= z
+
+    this.#mat = result
+    return this
+  }
+
+  translate(x: number = 0, y: number = 0, z: number = 0) {
+    const mat = this.#mat
+    let result = this.#mat
+
+    result[12] += mat[0] * x + mat[4] * y + mat[8] * z
+    result[13] += mat[1] * x + mat[5] * y + mat[9] * z
+    result[14] += mat[2] * x + mat[6] * y + mat[10] * z
+    result[15] += mat[3] * x + mat[7] * y + mat[11] * z
+
+    this.#mat = result
+    return this
+  }
+
   get m11() {
     return this.#mat[0]
   }
