@@ -6,8 +6,8 @@
 
 // @see https://github.com/kotofurumiya/matrixgl/blob/master/src/matrix.ts
 
-import { Quaternion } from './quaternion'
-import { Float32Vector3 } from './vector'
+import { Quaternion } from './quaternion.js'
+import { Float32Vector3 } from './vector.js'
 
 /**
  * An interface for matrices;

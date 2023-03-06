@@ -1,3 +1,3 @@
-export * from './vector'
-export * from './matrix'
-export * from './quaternion'
+export * from './vector.js'
+export * from './matrix.js'
+export * from './quaternion.js'

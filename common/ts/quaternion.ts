@@ -6,8 +6,8 @@
 
 // @see https://github.com/kotofurumiya/matrixgl/blob/master/src/quaternion.ts
 
-import { Matrix4x4 } from './matrix'
-import { Float32Vector3 } from './vector'
+import { Matrix4x4 } from './matrix.js'
+import { Float32Vector3 } from './vector.js'
 
 /**
  * Quaternion which is 4-dimensional complex number.
