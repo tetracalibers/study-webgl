@@ -199,6 +199,33 @@ const getIBO = (gl, indices) => {
 }
 
 /**
+ * 頂点属性のバインドと登録を行う関数
+ *
+ * @param {WebGL2RenderingContext} gl
+ * @param {Object} attribute
+ * @param {WebGLBuffer} attribute.vbo
+ * @param {number} attribute.location
+ * @param {number} attribute.stride
+ */
+const setAttribute = (gl, attribute) => {
+  // バッファをバインドする
+  gl.bindBuffer(gl.ARRAY_BUFFER, attribute.vbo)
+
+  // attributeLocationを有効にする
+  gl.enableVertexAttribArray(attribute.location)
+
+  // attributeLocationを通知し登録する
+  gl.vertexAttribPointer(
+    attribute.location,
+    attribute.stride,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  )
+}
+
+/**
  * lil-guiによるGUIコントロール作成
  * @param {*} settings
  * @param {*} [options={ width: 300 }]
@@ -263,5 +290,6 @@ export const utils = {
   getProgram,
   getVBO,
   getIBO,
+  setAttribute,
   configureControls,
 }
