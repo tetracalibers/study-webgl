@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w016.html
+// @see https://wgld.org/d/webgl/w017.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -10,17 +10,11 @@ let canvas = null
 let gl = null
 /** @type {WebGLProgram | null} */
 let program = null
-/** @type {number} */
-let startTime = 0.0
-/** @type {[number, number]} */
-let resolution = [0, 0]
-/** @type {[number, number]} */
-let mouse = [0.5, 0.5]
 
 /** @type {Matrix4x4} */
-let mvp1Matrix
-/** @type {Matrix4x4} */
-let mvp2Matrix
+let pvMatrix
+
+let count = 0
 
 /**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
@@ -34,11 +28,6 @@ const initProgram = async () => {
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
-  program.uTime = gl.getUniformLocation(program, 'u_time')
-  program.uResolusion = gl.getUniformLocation(program, 'u_resolution')
-  program.uMouse = gl.getUniformLocation(program, 'u_mouse')
-
-  startTime = new Date().getTime()
 
   gl.useProgram(program)
 }
@@ -87,15 +76,7 @@ const initBuffers = () => {
     far: 100, // ファークリップ
   })
   // 共通の変換行列を作っておく
-  const pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
-
-  // 1つ目のモデル
-  const m1Matrix = Matrix4x4.identity().translate(1.5, 0.0, 0.0)
-  mvp1Matrix = pvMatrix.mulByMatrix4x4(m1Matrix)
-
-  // 2つ目のモデル
-  const m2Matrix = Matrix4x4.identity().translate(-1.5, 0.0, 0.0)
-  mvp2Matrix = pvMatrix.mulByMatrix4x4(m2Matrix)
+  pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
 }
 
 /**
@@ -105,19 +86,33 @@ const draw = () => {
   // canvasを初期化
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-  // ミリ秒単位の時間をそのまま渡すと非常に大きな数字になってしまうため、
-  // 千分の一にしてシェーダに送る
-  const time = (new Date().getTime() - startTime) * 0.001
-  gl.uniform1f(program.uTime, time)
-  gl.uniform2fv(program.uResolusion, resolution)
-  gl.uniform2fv(program.uMouse, mouse)
+  // カウンタをインクリメント
+  count++
 
-  // 1つ目のモデルをバッファ上に描画
+  // カウンタを元にラジアンを算出
+  const rad = ((count % 360) * Math.PI) / 180
+
+  //// モデル1は円の軌道を描き移動する
+  const x = Math.cos(rad)
+  const y = Math.sin(rad)
+  const m1Matrix = Matrix4x4.identity().translate(x, y + 1.0, 0.0)
+  const mvp1Matrix = pvMatrix.mulByMatrix4x4(m1Matrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvp1Matrix.values)
   gl.drawArrays(gl.TRIANGLES, 0, 3)
 
-  // 2つ目のモデルをバッファ上に描画
+  // モデル2はY軸を中心に回転する
+  const m2Matrix = Matrix4x4.identity().translate(1.0, -1.0, 0.0).rotateY(rad)
+  const mvp2Matrix = pvMatrix.mulByMatrix4x4(m2Matrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvp2Matrix.values)
+  gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+  // モデル3は拡大縮小する
+  const s = Math.sin(rad) + 1.0
+  const m3Matrix = Matrix4x4.identity()
+    .translate(-1.0, -1.0, 0.0)
+    .scale(s, s, 0.0)
+  const mvp3Matrix = pvMatrix.mulByMatrix4x4(m3Matrix)
+  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvp3Matrix.values)
   gl.drawArrays(gl.TRIANGLES, 0, 3)
 
   // コンテキストの再描画
@@ -134,16 +129,6 @@ const render = () => {
 }
 
 /**
- * マウスが動いた時のイベントハンドラ
- * @param {MouseEvent} e
- */
-const onMouseMove = (e) => {
-  const [canvasWidth, canvasHeight] = resolution
-  // マウスカーソルの座標は、スクリーンの幅で正規化して 0 ～ 1 の範囲でシェーダに送る
-  mouse = [e.offsetX / canvasWidth, e.offsetY / canvasHeight]
-}
-
-/**
  * アプリケーションの初期化関数
  */
 const init = async () => {
@@ -151,9 +136,6 @@ const init = async () => {
 
   canvas.width = 300
   canvas.height = 300
-
-  resolution = [canvas.width, canvas.height]
-  canvas.addEventListener('mousemove', onMouseMove, true)
 
   gl = utils.getGLContext(canvas)
 
