@@ -1,5 +1,4 @@
-// @see https://wgld.org/d/webgl/w011.html
-// @see https://wgld.org/d/webgl/w014.html
+// @see https://wgld.org/d/webgl/w015.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -28,6 +27,7 @@ const initProgram = async () => {
   program = utils.getProgram(gl, vertexShader, fragmentShader)
 
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
+  program.aVertexColor = gl.getAttribLocation(program, 'a_color')
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
   program.uTime = gl.getUniformLocation(program, 'u_time')
   program.uResolusion = gl.getUniformLocation(program, 'u_resolution')
@@ -42,23 +42,47 @@ const initProgram = async () => {
  * バッファを準備する関数
  */
 const initBuffers = () => {
-  // モデル(頂点)データ
-  const vertices = [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0]
+  // 頂点の位置情報を格納する配列
+  const vertex_position = [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0]
+
+  // 頂点の色情報を格納する配列
+  // prettier-ignore
+  const vertex_color = [
+    // R, G, B, A
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+  ]
 
   // 3つの要素を持つvec3型の変数であることを示す
-  const attStride = 3
+  const positionAttStride = 3
+  // vec4型
+  const colorAttStride = 4
 
   // VBOの生成
-  const vPosition = utils.getVBO(gl, vertices)
+  const vPosition = utils.getVBO(gl, vertex_position)
+  const vColor = utils.getVBO(gl, vertex_color)
 
-  // VBOをバインド
+  // 頂点位置情報VBOをバインド
   gl.bindBuffer(gl.ARRAY_BUFFER, vPosition)
   // attribute属性を有効にする
   gl.enableVertexAttribArray(program.aVertexPosition)
   // attribute属性を登録
   gl.vertexAttribPointer(
     program.aVertexPosition,
-    attStride,
+    positionAttStride,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  )
+
+  // 頂点色情報VBOをバインド
+  gl.bindBuffer(gl.ARRAY_BUFFER, vColor)
+  gl.enableVertexAttribArray(program.aVertexColor)
+  gl.vertexAttribPointer(
+    program.aVertexColor,
+    colorAttStride,
     gl.FLOAT,
     false,
     0,
