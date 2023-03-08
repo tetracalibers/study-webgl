@@ -1,8 +1,9 @@
-// @see https://wgld.org/d/webgl/w018.html
+// @see https://wgld.org/d/webgl/w020.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
 import { Float32Vector3 } from '../common/js/dist/vector.js'
+import { torus } from './torus.js'
 
 /** @type {HTMLCanvasElement | null} */
 let canvas = null
@@ -39,34 +40,20 @@ const initProgram = async () => {
  * バッファを準備する関数
  */
 const initBuffers = () => {
-  // 頂点の位置情報を格納する配列
-  const vertex_position = [
-    0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0,
-  ]
-
-  // 頂点の色情報を格納する配列
-  const vertex_color = [
-    1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-    1.0,
-  ]
-
-  // 頂点のインデックス情報を格納する配列
-  // prettier-ignore
-  index = [
-    0, 1, 2, // 一つ目の三角形ポリゴンは[ 0, 1, 2 ]の頂点
-    1, 2, 3 // 二つ目の三角形ポリゴンは[ 1, 2, 3 ]の頂点
-  ]
+  const torusData = torus(32, 32, 1.0, 2.0)
+  const { positions, colors } = torusData
+  index = torusData.index
 
   // 頂点位置情報VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, vertex_position),
+    vbo: utils.getVBO(gl, positions),
     location: program.aVertexPosition,
     stride: 3, // vec3型
   })
 
   // 頂点色情報VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, vertex_color),
+    vbo: utils.getVBO(gl, colors),
     location: program.aVertexColor,
     stride: 4, // vec4型
   })
@@ -77,7 +64,7 @@ const initBuffers = () => {
 
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 0.0, 5.0), // 三次元空間を映し出すカメラを後ろに 5.0 移動した状態で置く
+    new Float32Vector3(0.0, 0.0, 20.0), // 三次元空間を映し出すカメラを後ろに 20.0 移動した状態で置く
     new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
     new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
   )
@@ -106,7 +93,10 @@ const draw = () => {
   const rad = ((count % 360) * Math.PI) / 180
 
   // モデルはY軸を中心に回転する
-  const mMatrix = Matrix4x4.identity().rotateY(rad)
+  const mMatrix = Matrix4x4.identity().rotateAround(
+    new Float32Vector3(0.0, 1.0, 1.0).normalize(),
+    rad
+  )
   const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
 
@@ -141,6 +131,11 @@ const init = async () => {
   gl.clearColor(0.0, 0.0, 0.0, 1.0)
   // canvasを初期化する際の深度を設定する
   gl.clearDepth(1.0)
+
+  // カリングと深度テストを有効にする
+  gl.enable(gl.DEPTH_TEST)
+  gl.depthFunc(gl.LEQUAL)
+  gl.enable(gl.CULL_FACE)
 
   // 適切な順序で関数を呼び出す
   await initProgram()
