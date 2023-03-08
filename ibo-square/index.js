@@ -43,40 +43,19 @@ const initBuffers = () => {
     0.0, 0.0, 1.0, 1.0,
   ]
 
-  // 3つの要素を持つvec3型の変数であることを示す
-  const positionAttStride = 3
-  // vec4型
-  const colorAttStride = 4
+  // 頂点位置情報VBO
+  utils.setAttribute(gl, {
+    vbo: utils.getVBO(gl, vertex_position),
+    location: program.aVertexPosition,
+    stride: 3, // vec3型
+  })
 
-  // VBOの生成
-  const vPosition = utils.getVBO(gl, vertex_position)
-  const vColor = utils.getVBO(gl, vertex_color)
-
-  // 頂点位置情報VBOをバインド
-  gl.bindBuffer(gl.ARRAY_BUFFER, vPosition)
-  // attribute属性を有効にする
-  gl.enableVertexAttribArray(program.aVertexPosition)
-  // attribute属性を登録
-  gl.vertexAttribPointer(
-    program.aVertexPosition,
-    positionAttStride,
-    gl.FLOAT,
-    false,
-    0,
-    0
-  )
-
-  // 頂点色情報VBOをバインド
-  gl.bindBuffer(gl.ARRAY_BUFFER, vColor)
-  gl.enableVertexAttribArray(program.aVertexColor)
-  gl.vertexAttribPointer(
-    program.aVertexColor,
-    colorAttStride,
-    gl.FLOAT,
-    false,
-    0,
-    0
-  )
+  // 頂点色情報VBO
+  utils.setAttribute(gl, {
+    vbo: utils.getVBO(gl, vertex_color),
+    location: program.aVertexColor,
+    stride: 4, // vec4型
+  })
 
   // モデル座標変換行列
   const mMatrix = Matrix4x4.identity()
