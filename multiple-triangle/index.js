@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w015.html
+// @see https://wgld.org/d/webgl/w016.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -16,6 +16,11 @@ let startTime = 0.0
 let resolution = [0, 0]
 /** @type {[number, number]} */
 let mouse = [0.5, 0.5]
+
+/** @type {Matrix4x4} */
+let mvp1Matrix
+/** @type {Matrix4x4} */
+let mvp2Matrix
 
 /**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
@@ -68,11 +73,9 @@ const initBuffers = () => {
     stride: 4, // vec4型
   })
 
-  // モデル座標変換行列
-  const mMatrix = Matrix4x4.identity()
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 1.0, 3.0), // 三次元空間を映し出すカメラを、原点から上に 1.0 、後ろに 3.0 移動した状態で置く
+    new Float32Vector3(0.0, 0.0, 3.0), // 三次元空間を映し出すカメラを、原点から上に 1.0 、後ろに 3.0 移動した状態で置く
     new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
     new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
   )
@@ -83,11 +86,16 @@ const initBuffers = () => {
     near: 0.1, // ニアクリップ
     far: 100, // ファークリップ
   })
-  // 各行列を掛け合わせ座標変換行列を完成させる
-  const mvpMatrix = pMatrix.mulByMatrix4x4(vMatrix).mulByMatrix4x4(mMatrix)
-  // uniformLocationへ座標変換行列を登録
-  // - 第二引数は行列を転置するかどうか
-  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
+  // 共通の変換行列を作っておく
+  const pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
+
+  // 1つ目のモデル
+  const m1Matrix = Matrix4x4.identity().translate(1.5, 0.0, 0.0)
+  mvp1Matrix = pvMatrix.mulByMatrix4x4(m1Matrix)
+
+  // 2つ目のモデル
+  const m2Matrix = Matrix4x4.identity().translate(-1.5, 0.0, 0.0)
+  mvp2Matrix = pvMatrix.mulByMatrix4x4(m2Matrix)
 }
 
 /**
@@ -104,10 +112,14 @@ const draw = () => {
   gl.uniform2fv(program.uResolusion, resolution)
   gl.uniform2fv(program.uMouse, mouse)
 
-  // モデルをバッファ上に描画
-  // - 第二引数は何番目の頂点から利用するかのオフセット
-  // - 第三引数はいくつの頂点を描画するのか
+  // 1つ目のモデルをバッファ上に描画
+  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvp1Matrix.values)
   gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+  // 2つ目のモデルをバッファ上に描画
+  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvp2Matrix.values)
+  gl.drawArrays(gl.TRIANGLES, 0, 3)
+
   // コンテキストの再描画
   // 画面上にレンダリングされたモデルを描画するためには、コンテキストをリフレッシュする必要がある
   gl.flush()
