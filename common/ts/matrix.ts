@@ -322,80 +322,67 @@ export class Matrix4x4 implements Matrix {
    * @memberof Matrix4x4
    */
   mulByMatrix4x4(other: Matrix4x4): Matrix4x4 {
-    const m11 = this.#values[0]
-    const m12 = this.#values[1]
-    const m13 = this.#values[2]
-    const m14 = this.#values[3]
-    const m21 = this.#values[4]
-    const m22 = this.#values[5]
-    const m23 = this.#values[6]
-    const m24 = this.#values[7]
-    const m31 = this.#values[8]
-    const m32 = this.#values[9]
-    const m33 = this.#values[10]
-    const m34 = this.#values[11]
-    const m41 = this.#values[12]
-    const m42 = this.#values[13]
-    const m43 = this.#values[14]
-    const m44 = this.#values[15]
+    const m11: number = this.#values[0]
+    const m12: number = this.#values[4]
+    const m13: number = this.#values[8]
+    const m14: number = this.#values[12]
+    const m21: number = this.#values[1]
+    const m22: number = this.#values[5]
+    const m23: number = this.#values[9]
+    const m24: number = this.#values[13]
+    const m31: number = this.#values[2]
+    const m32: number = this.#values[6]
+    const m33: number = this.#values[10]
+    const m34: number = this.#values[14]
+    const m41: number = this.#values[3]
+    const m42: number = this.#values[7]
+    const m43: number = this.#values[11]
+    const m44: number = this.#values[15]
 
-    const M11 = other.values[0]
-    const M12 = other.values[1]
-    const M13 = other.values[2]
-    const M14 = other.values[3]
-    const M21 = other.values[4]
-    const M22 = other.values[5]
-    const M23 = other.values[6]
-    const M24 = other.values[7]
-    const M31 = other.values[8]
-    const M32 = other.values[9]
-    const M33 = other.values[10]
-    const M34 = other.values[11]
-    const M41 = other.values[12]
-    const M42 = other.values[13]
-    const M43 = other.values[14]
-    const M44 = other.values[15]
+    const o11: number = other.values[0]
+    const o12: number = other.values[4]
+    const o13: number = other.values[8]
+    const o14: number = other.values[12]
+    const o21: number = other.values[1]
+    const o22: number = other.values[5]
+    const o23: number = other.values[9]
+    const o24: number = other.values[13]
+    const o31: number = other.values[2]
+    const o32: number = other.values[6]
+    const o33: number = other.values[10]
+    const o34: number = other.values[14]
+    const o41: number = other.values[3]
+    const o42: number = other.values[7]
+    const o43: number = other.values[11]
+    const o44: number = other.values[15]
 
-    // Cik = Σ Aij * Bjk
-    let result: number[] = []
+    const p11: number = m11 * o11 + m12 * o21 + m13 * o31 + m14 * o41
+    const p12: number = m11 * o12 + m12 * o22 + m13 * o32 + m14 * o42
+    const p13: number = m11 * o13 + m12 * o23 + m13 * o33 + m14 * o43
+    const p14: number = m11 * o14 + m12 * o24 + m13 * o34 + m14 * o44
 
-    // C11 = Σ A1j * Bj1
-    result[0] = M11 * m11 + M12 * m21 + M13 * m31 + M14 * m41
-    // C12 = Σ A1j * Bj2
-    result[1] = M11 * m12 + M12 * m22 + M13 * m32 + M14 * m42
-    // C13 = Σ A1j * Bj3
-    result[2] = M11 * m13 + M12 * m23 + M13 * m33 + M14 * m43
-    // C14 = Σ A1j * Bj4
-    result[3] = M11 * m14 + M12 * m24 + M13 * m34 + M14 * m44
+    const p21: number = m21 * o11 + m22 * o21 + m23 * o31 + m24 * o41
+    const p22: number = m21 * o12 + m22 * o22 + m23 * o32 + m24 * o42
+    const p23: number = m21 * o13 + m22 * o23 + m23 * o33 + m24 * o43
+    const p24: number = m21 * o14 + m22 * o24 + m23 * o34 + m24 * o44
 
-    // C21 = Σ A2j * Bj1
-    result[4] = M21 * m11 + M22 * m21 + M23 * m31 + M24 * m41
-    // C22 = Σ A2j * Bj2
-    result[5] = M21 * m12 + M22 * m22 + M23 * m32 + M24 * m42
-    // C23 = Σ A2j * Bj3
-    result[6] = M21 * m13 + M22 * m23 + M23 * m33 + M24 * m43
-    // C24 = Σ A2j * Bj4
-    result[7] = M21 * m14 + M22 * m24 + M23 * m34 + M24 * m44
+    const p31: number = m31 * o11 + m32 * o21 + m33 * o31 + m34 * o41
+    const p32: number = m31 * o12 + m32 * o22 + m33 * o32 + m34 * o42
+    const p33: number = m31 * o13 + m32 * o23 + m33 * o33 + m34 * o43
+    const p34: number = m31 * o14 + m32 * o24 + m33 * o34 + m34 * o44
 
-    // C31 = Σ A3j * Bj1
-    result[8] = M31 * m11 + M32 * m21 + M33 * m31 + M34 * m41
-    // C32 = Σ A3j * Bj2
-    result[9] = M31 * m12 + M32 * m22 + M33 * m32 + M34 * m42
-    // C33 = Σ A3j * Bj3
-    result[10] = M31 * m13 + M32 * m23 + M33 * m33 + M34 * m43
-    // C34 = Σ A3j * Bj4
-    result[11] = M31 * m14 + M32 * m24 + M33 * m34 + M34 * m44
+    const p41: number = m41 * o11 + m42 * o21 + m43 * o31 + m44 * o41
+    const p42: number = m41 * o12 + m42 * o22 + m43 * o32 + m44 * o42
+    const p43: number = m41 * o13 + m42 * o23 + m43 * o33 + m44 * o43
+    const p44: number = m41 * o14 + m42 * o24 + m43 * o34 + m44 * o44
 
-    // C41 = Σ A4j * Bj1
-    result[12] = M41 * m11 + M42 * m21 + M43 * m31 + M44 * m41
-    // C42 = Σ A4j * Bj2
-    result[13] = M41 * m12 + M42 * m22 + M43 * m32 + M44 * m42
-    // C43 = Σ A4j * Bj3
-    result[14] = M41 * m13 + M42 * m23 + M43 * m33 + M44 * m43
-    // C44 = Σ A4j * Bj4
-    result[15] = M41 * m14 + M42 * m24 + M43 * m34 + M44 * m44
-
-    return new Matrix4x4(...result)
+    // prettier-ignore
+    return new Matrix4x4(
+      p11, p21, p31, p41,
+      p12, p22, p32, p42,
+      p13, p23, p33, p43,
+      p14, p24, p34, p44
+    )
   }
 
   /**
