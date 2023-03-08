@@ -187,7 +187,7 @@ const getIBO = (gl, indices) => {
   // バッファにデータをセット
   gl.bufferData(
     gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indices),
+    new Int16Array(indices),
     gl.STATIC_DRAW
   )
 
