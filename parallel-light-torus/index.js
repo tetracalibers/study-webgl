@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w020.html
+// @see https://wgld.org/d/webgl/w021.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -30,8 +30,12 @@ const initProgram = async () => {
   program = utils.getProgram(gl, vertexShader, fragmentShader)
 
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
+  program.aNormal = gl.getAttribLocation(program, 'a_normal')
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
+
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
+  program.uMInvMatrix = gl.getUniformLocation(program, 'u_mInvMatrix')
+  program.uLightDirection = gl.getUniformLocation(program, 'u_lightDirection')
 
   gl.useProgram(program)
 }
@@ -41,7 +45,7 @@ const initProgram = async () => {
  */
 const initBuffers = () => {
   const torusData = torus(32, 32, 1.0, 2.0)
-  const { positions, colors } = torusData
+  const { positions, colors, normals } = torusData
   index = torusData.index
 
   // 頂点位置情報VBO
@@ -49,6 +53,13 @@ const initBuffers = () => {
     vbo: utils.getVBO(gl, positions),
     location: program.aVertexPosition,
     stride: 3, // vec3型
+  })
+
+  // 法線情報VBO
+  utils.setAttribute(gl, {
+    vbo: utils.getVBO(gl, normals),
+    location: program.aNormal,
+    stride: 3,
   })
 
   // 頂点色情報VBO
@@ -92,13 +103,20 @@ const draw = () => {
   // カウンタを元にラジアンを算出
   const rad = ((count % 360) * Math.PI) / 180
 
-  // モデルはY軸を中心に回転する
+  // 回転するモデル
   const mMatrix = Matrix4x4.identity().rotateAround(
     new Float32Vector3(0.0, 1.0, 1.0).normalize(),
     rad
   )
   const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
+
+  // モデルの逆行列
+  const mInvMatrix = mMatrix.inverse()
+  gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrix.values)
+
+  // 平行光源の向き
+  gl.uniform3fv(program.uLightDirection, [-0.5, 0.5, 0.5])
 
   // インデックスを用いた描画命令
   gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)

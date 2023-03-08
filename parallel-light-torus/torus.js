@@ -51,6 +51,7 @@ export const torus = (
   const tRadius = torusRadius
 
   let positions = []
+  let normals = []
   let colors = []
   let idxs = []
 
@@ -60,8 +61,8 @@ export const torus = (
     // csは cross section（断面）の略
     const csRad = ((Math.PI * 2) / row) * i
     // 処理中の頂点のxy座標
-    const cx = Math.cos(csRad) * csRadius
-    const cy = Math.sin(csRad) * csRadius
+    const cx = Math.cos(csRad)
+    const cy = Math.sin(csRad)
 
     // 断面円を並べる数だけループ
     for (let j = 0; j <= column; j++) {
@@ -69,10 +70,16 @@ export const torus = (
       // tは torus の略
       const tRad = ((Math.PI * 2) / column) * j
       // 処理中の断面円のxyz座標
-      const tx = (cx + tRadius) * Math.cos(tRad)
-      const ty = cy
-      const tz = (cx + tRadius) * Math.sin(tRad)
+      const tx = (cx * csRadius + tRadius) * Math.cos(tRad)
+      const ty = cy * csRadius
+      const tz = (cx * csRadius + tRadius) * Math.sin(tRad)
       positions.push(tx, ty, tz)
+
+      // 法線
+      const rx = cx * Math.cos(tRad)
+      const ry = cy
+      const rz = cx * Math.sin(tRad)
+      normals.push(rx, ry, rz)
 
       // 処理中の断面円の色
       const tc = hsvaToRgba((360 / column) * j, 1, 1, 1)
@@ -90,6 +97,7 @@ export const torus = (
 
   return {
     positions,
+    normals,
     colors,
     index: idxs,
   }
