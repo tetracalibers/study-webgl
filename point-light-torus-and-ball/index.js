@@ -3,7 +3,7 @@
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
 import { Float32Vector3 } from '../common/js/dist/vector.js'
-import { torus } from './shape.js'
+import { torus, sphere } from './shape.js'
 
 /** @type {HTMLCanvasElement | null} */
 let canvas = null
@@ -11,9 +11,6 @@ let canvas = null
 let gl = null
 /** @type {WebGLProgram | null} */
 let program = null
-
-/** @type {number[]} */
-let index = []
 
 /** @type {Matrix4x4} */
 let pvMatrix
@@ -43,37 +40,52 @@ const initProgram = async () => {
 }
 
 /**
- * バッファを準備する関数
+ * 特定のオブジェクトの描画のためのバッファを準備する関数
+ *
+ * @param {Object} shape
+ * @param {number[]} shape.positions
+ * @param {number[]} shape.normals
+ * @param {number[]} shape.colors,
+ * @param {number[]} shape.index
  */
-const initBuffers = () => {
-  const torusData = torus(32, 32, 1.0, 2.0)
-  const { positions, colors, normals } = torusData
-  index = torusData.index
-
+const initShapeBuffers = (shape) => {
   // 頂点位置情報VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, positions),
+    vbo: utils.getVBO(gl, shape.positions),
     location: program.aVertexPosition,
     stride: 3, // vec3型
   })
 
   // 法線情報VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, normals),
+    vbo: utils.getVBO(gl, shape.normals),
     location: program.aNormal,
     stride: 3,
   })
 
   // 頂点色情報VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, colors),
+    vbo: utils.getVBO(gl, shape.colors),
     location: program.aVertexColor,
     stride: 4, // vec4型
   })
 
   // IBO
-  const ibo = utils.getIBO(gl, index)
+  const ibo = utils.getIBO(gl, shape.index)
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
+}
+
+/**
+ * バッファを準備する関数
+ */
+const initBuffers = () => {
+  // トーラス
+  const torusData = torus(64, 64, 0.5, 1.5, [0.75, 0.25, 0.25, 1.0])
+  initShapeBuffers(torusData)
+
+  // 球体
+  const sphereData = sphere(64, 64, 2.0, [0.25, 0.25, 0.75, 1.0])
+  initBuffers(sphereData)
 
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
