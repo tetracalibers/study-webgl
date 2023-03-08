@@ -36,7 +36,7 @@ void main() {
   
   // 反射光は光の強さを直接表す係数として使うので、環境光と同じように加算処理で色成分に加える
   // 色 = 頂点色 * 拡散光 + 反射光 + 環境光
-  vec4 light = v_Color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
+  vec4 light = v_Color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0) + u_ambientColor;
   
   outColor = light;
 }
