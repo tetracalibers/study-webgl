@@ -3,7 +3,7 @@
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
 import { Float32Vector3 } from '../common/js/dist/vector.js'
-import { torus } from './torus.js'
+import { torus } from './shape.js'
 
 /** @type {HTMLCanvasElement | null} */
 let canvas = null
