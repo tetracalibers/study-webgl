@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w023.html
+// @see https://wgld.org/d/webgl/w024.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
