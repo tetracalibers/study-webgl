@@ -10,12 +10,6 @@ let canvas = null
 let gl = null
 /** @type {WebGLProgram | null} */
 let program = null
-/** @type {number} */
-let startTime = 0.0
-/** @type {[number, number]} */
-let resolution = [0, 0]
-/** @type {[number, number]} */
-let mouse = [0.5, 0.5]
 
 /**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
@@ -29,11 +23,6 @@ const initProgram = async () => {
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
-  program.uTime = gl.getUniformLocation(program, 'u_time')
-  program.uResolusion = gl.getUniformLocation(program, 'u_resolution')
-  program.uMouse = gl.getUniformLocation(program, 'u_mouse')
-
-  startTime = new Date().getTime()
 
   gl.useProgram(program)
 }
@@ -118,13 +107,6 @@ const draw = () => {
   // canvasを初期化
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-  // ミリ秒単位の時間をそのまま渡すと非常に大きな数字になってしまうため、
-  // 千分の一にしてシェーダに送る
-  const time = (new Date().getTime() - startTime) * 0.001
-  gl.uniform1f(program.uTime, time)
-  gl.uniform2fv(program.uResolusion, resolution)
-  gl.uniform2fv(program.uMouse, mouse)
-
   // モデルをバッファ上に描画
   // - 第二引数は何番目の頂点から利用するかのオフセット
   // - 第三引数はいくつの頂点を描画するのか
@@ -143,16 +125,6 @@ const render = () => {
 }
 
 /**
- * マウスが動いた時のイベントハンドラ
- * @param {MouseEvent} e
- */
-const onMouseMove = (e) => {
-  const [canvasWidth, canvasHeight] = resolution
-  // マウスカーソルの座標は、スクリーンの幅で正規化して 0 ～ 1 の範囲でシェーダに送る
-  mouse = [e.offsetX / canvasWidth, e.offsetY / canvasHeight]
-}
-
-/**
  * アプリケーションの初期化関数
  */
 const init = async () => {
@@ -160,9 +132,6 @@ const init = async () => {
 
   canvas.width = 300
   canvas.height = 300
-
-  resolution = [canvas.width, canvas.height]
-  canvas.addEventListener('mousemove', onMouseMove, true)
 
   gl = utils.getGLContext(canvas)
 
