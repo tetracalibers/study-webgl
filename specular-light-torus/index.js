@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w022.html
+// @see https://wgld.org/d/webgl/w023.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -36,6 +36,7 @@ const initProgram = async () => {
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
   program.uMInvMatrix = gl.getUniformLocation(program, 'u_mInvMatrix')
   program.uLightDirection = gl.getUniformLocation(program, 'u_lightDirection')
+  program.uEyeDirection = gl.getUniformLocation(program, 'u_eyeDirection')
   program.uAmbientColor = gl.getUniformLocation(program, 'u_ambientColor')
 
   gl.useProgram(program)
@@ -118,6 +119,8 @@ const draw = () => {
 
   // 平行光源の向き
   gl.uniform3fv(program.uLightDirection, [-0.5, 0.5, 0.5])
+  // 視線ベクトル
+  gl.uniform3fv(program.uEyeDirection, [0.0, 0.0, 20.0])
   // 環境光の色
   gl.uniform4fv(program.uAmbientColor, [0.1, 0.1, 0.1, 1.0])
 
