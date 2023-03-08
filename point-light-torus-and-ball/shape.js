@@ -38,12 +38,14 @@ const hsvaToRgba = (h, s, v, a) => {
  * @param {number} pipeDivisitionsCount - パイプをいくつの円で分割するのか
  * @param {number} crossSectionRadius - 断面円の半径
  * @param {number} torusRadius - トーラス自体の半径（中心から断面円までの距離）
+ * @param {number[]} color - RGBA色
  */
 export const torus = (
   crossSectionVerticesCount,
   pipeDivisitionsCount,
   crossSectionRadius,
-  torusRadius
+  torusRadius,
+  color
 ) => {
   const row = crossSectionVerticesCount
   const column = pipeDivisitionsCount
@@ -82,7 +84,7 @@ export const torus = (
       normals.push(rx, ry, rz)
 
       // 処理中の断面円の色
-      const tc = hsvaToRgba((360 / column) * j, 1, 1, 1)
+      const tc = color ? color : hsvaToRgba((360 / column) * j, 1, 1, 1)
       colors.push(...tc)
     }
   }
