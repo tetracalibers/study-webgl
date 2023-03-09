@@ -15,6 +15,13 @@ let program = null
 /** @type {Matrix4x4} */
 let pvMatrix
 
+// 視線
+const eyeDirection = [0.0, 0.0, 20.0]
+// トーラス
+const torusData = torus(64, 64, 0.5, 1.5, [0.75, 0.25, 0.25, 1.0])
+// 球体
+const sphereData = sphere(64, 64, 2.0, [0.25, 0.25, 0.75, 1.0])
+
 let count = 0
 
 /**
@@ -30,9 +37,10 @@ const initProgram = async () => {
   program.aNormal = gl.getAttribLocation(program, 'a_normal')
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
 
+  program.uMMatrix = gl.getUniformLocation(program, 'u_mMatrix')
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
   program.uMInvMatrix = gl.getUniformLocation(program, 'u_mInvMatrix')
-  program.uLightDirection = gl.getUniformLocation(program, 'u_lightDirection')
+  program.uLightDirection = gl.getUniformLocation(program, 'u_lightPosition')
   program.uEyeDirection = gl.getUniformLocation(program, 'u_eyeDirection')
   program.uAmbientColor = gl.getUniformLocation(program, 'u_ambientColor')
 
@@ -48,7 +56,7 @@ const initProgram = async () => {
  * @param {number[]} shape.colors,
  * @param {number[]} shape.index
  */
-const initShapeBuffers = (shape) => {
+const setShapeBuffers = (shape) => {
   // 頂点位置情報VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, shape.positions),
@@ -79,17 +87,9 @@ const initShapeBuffers = (shape) => {
  * バッファを準備する関数
  */
 const initBuffers = () => {
-  // トーラス
-  const torusData = torus(64, 64, 0.5, 1.5, [0.75, 0.25, 0.25, 1.0])
-  initShapeBuffers(torusData)
-
-  // 球体
-  const sphereData = sphere(64, 64, 2.0, [0.25, 0.25, 0.75, 1.0])
-  initBuffers(sphereData)
-
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 0.0, 20.0), // 三次元空間を映し出すカメラを後ろに 20.0 移動した状態で置く
+    new Float32Vector3(...eyeDirection), // 三次元空間を映し出すカメラを置く
     new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
     new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
   )
@@ -105,23 +105,23 @@ const initBuffers = () => {
 }
 
 /**
- * canvasに描画する関数
+ * トーラスを描画する関数
+ *
+ * @param {number} tx
+ * @param {number} ty
+ * @param {number} tz
+ * @param {number} rad
  */
-const draw = () => {
-  // canvasを初期化
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+const drawTorus = (tx, ty, tz, rad) => {
+  const shape = torusData
 
-  // カウンタをインクリメント
-  count++
+  setShapeBuffers(shape)
 
-  // カウンタを元にラジアンを算出
-  const rad = ((count % 360) * Math.PI) / 180
+  const mMatrix = Matrix4x4.identity()
+    .translate(tx, -ty, -tz)
+    .rotateAround(new Float32Vector3(0.0, 1.0, 1.0).normalize(), -rad)
+  gl.uniformMatrix4fv(program.uMMatrix, false, mMatrix.values)
 
-  // 回転するモデル
-  const mMatrix = Matrix4x4.identity().rotateAround(
-    new Float32Vector3(0.0, 1.0, 1.0).normalize(),
-    rad
-  )
   const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
 
@@ -129,15 +129,56 @@ const draw = () => {
   const mInvMatrix = mMatrix.inverse()
   gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrix.values)
 
-  // 平行光源の向き
-  gl.uniform3fv(program.uLightDirection, [-0.5, 0.5, 0.5])
+  // インデックスを用いた描画命令
+  gl.drawElements(gl.TRIANGLES, shape.index.length, gl.UNSIGNED_SHORT, 0)
+}
+
+const drawSphere = (tx, ty, tz, rad) => {
+  const shape = sphereData
+
+  setShapeBuffers(shape)
+
+  const mMatrix = Matrix4x4.identity().translate(-tx, ty, tz)
+  gl.uniformMatrix4fv(program.uMMatrix, false, mMatrix.values)
+
+  const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
+  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
+
+  // モデルの逆行列
+  const mInvMatrix = mMatrix.inverse()
+  gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrix.values)
+
+  // インデックスを用いた描画命令
+  gl.drawElements(gl.TRIANGLES, shape.index.length, gl.UNSIGNED_SHORT, 0)
+}
+
+/**
+ * canvasに描画する関数
+ */
+const draw = () => {
+  // canvasを初期化
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+  // 点光源の位置
+  gl.uniform3fv(program.uLightPosition, [0.0, 0.0, 0.0])
   // 視線ベクトル
-  gl.uniform3fv(program.uEyeDirection, [0.0, 0.0, 20.0])
+  gl.uniform3fv(program.uEyeDirection, eyeDirection)
   // 環境光の色
   gl.uniform4fv(program.uAmbientColor, [0.1, 0.1, 0.1, 1.0])
 
-  // インデックスを用いた描画命令
-  gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)
+  // カウンタをインクリメント
+  count++
+
+  // カウンタを元にラジアンを算出
+  const rad = ((count % 360) * Math.PI) / 180
+
+  // 各種座標を算出
+  const tx = Math.cos(rad) * 3.5
+  const ty = Math.sin(rad) * 3.5
+  const tz = Math.sin(rad) * 3.5
+
+  drawTorus(tx, ty, tz, rad)
+  drawSphere(tx, ty, tz, rad)
 
   // コンテキストの再描画
   // 画面上にレンダリングされたモデルを描画するためには、コンテキストをリフレッシュする必要がある
