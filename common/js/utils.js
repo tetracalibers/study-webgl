@@ -199,6 +199,77 @@ const getIBO = (gl, indices) => {
 }
 
 /**
+ * テクスチャを生成し、返す非同期関数
+ *
+ * @param {WebGL2RenderingContext} gl
+ * @param {string} source
+ * @return {Promise<WebGLTexture | null>}
+ */
+const getTexture = (gl, source) => {
+  const img = new Image()
+
+  const _makeTexture = (img) => {
+    // テクスチャオブジェクトの生成
+    const tex = gl.createTexture()
+    // テクスチャをバインドする
+    gl.bindTexture(gl.TEXTURE_2D, tex)
+    // テクスチャへイメージを適用
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+    // ミップマップを生成
+    gl.generateMipmap(gl.TEXTURE_2D)
+    // テクスチャのバインドを無効化
+    gl.bindTexture(gl.TEXTURE_2D, null)
+    // 生成したテクスチャを返す
+    return tex
+  }
+
+  return new Promise((resolve) => {
+    img.onload = () => resolve(_makeTexture(img))
+    img.src = source
+  })
+}
+
+const getLoadImageTexture = (gl, url, render) => {
+  const tex = gl.createTexture()
+  gl.bindTexture(gl.TEXTURE_2D, tex)
+  // Fill the texture with a 1x1 blue pixel.
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    1,
+    1,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    new Uint8Array([0, 0, 255, 255])
+  )
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+  const textureInfo = {
+    width: 1, // we don't know the size until it loads
+    height: 1,
+    texture: tex,
+  }
+  const img = new Image()
+  img.addEventListener('load', function () {
+    textureInfo.width = img.width
+    textureInfo.height = img.height
+
+    gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+    gl.generateMipmap(gl.TEXTURE_2D)
+
+    render()
+  })
+  img.src = url
+
+  return textureInfo
+}
+
+/**
  * 頂点属性のバインドと登録を行う関数
  *
  * @param {WebGL2RenderingContext} gl
@@ -290,6 +361,8 @@ export const utils = {
   getProgram,
   getVBO,
   getIBO,
+  getTexture,
+  getLoadImageTexture,
   setAttribute,
   configureControls,
 }
