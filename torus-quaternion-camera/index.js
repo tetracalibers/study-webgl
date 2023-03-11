@@ -1,8 +1,9 @@
-// @see https://wgld.org/d/webgl/w024.html
+// @see https://wgld.org/d/webgl/w032.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
 import { Float32Vector3 } from '../common/js/dist/vector.js'
+import { Quaternion } from '../common/js/dist/quaternion.js'
 import { torus } from './torus.js'
 
 /** @type {HTMLCanvasElement | null} */
@@ -16,9 +17,14 @@ let program = null
 let index = []
 
 /** @type {Matrix4x4} */
-let pvMatrix
+let pMatrix
 
 let count = 0
+
+// 点光源の位置
+const lightPosition = [15.0, 10.0, 15.0]
+// 環境光の色
+const ambientColor = [0.1, 0.1, 0.1, 1.0]
 
 /**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
@@ -34,8 +40,9 @@ const initProgram = async () => {
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
 
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
+  program.uMMatrix = gl.getUniformLocation(program, 'u_mMatrix')
   program.uMInvMatrix = gl.getUniformLocation(program, 'u_mInvMatrix')
-  program.uLightDirection = gl.getUniformLocation(program, 'u_lightDirection')
+  program.uLightPosition = gl.getUniformLocation(program, 'u_lightPosition')
   program.uEyeDirection = gl.getUniformLocation(program, 'u_eyeDirection')
   program.uAmbientColor = gl.getUniformLocation(program, 'u_ambientColor')
 
@@ -46,7 +53,7 @@ const initProgram = async () => {
  * バッファを準備する関数
  */
 const initBuffers = () => {
-  const torusData = torus(32, 32, 1.0, 2.0)
+  const torusData = torus(64, 64, 0.5, 1.5)
   const { positions, colors, normals } = torusData
   index = torusData.index
 
@@ -75,21 +82,13 @@ const initBuffers = () => {
   const ibo = utils.getIBO(gl, index)
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
 
-  // ビュー座標変換行列
-  const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 0.0, 20.0), // 三次元空間を映し出すカメラを後ろに 20.0 移動した状態で置く
-    new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
-    new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
-  )
   // プロジェクション座標変換行列
-  const pMatrix = Matrix4x4.perspective({
+  pMatrix = Matrix4x4.perspective({
     fovYRadian: 45, // 視野角を 45 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
     far: 100 // ファークリップ
   })
-  // 共通の変換行列を作っておく
-  pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
 }
 
 /**
@@ -103,26 +102,40 @@ const draw = () => {
   count++
 
   // カウンタを元にラジアンを算出
-  const rad = ((count % 360) * Math.PI) / 180
+  const rad = ((count % 180) * Math.PI) / 90
+  const rad2 = ((count % 720) * Math.PI) / 360
 
-  // 回転するモデル
-  const mMatrix = Matrix4x4.identity().rotateAround(
-    new Float32Vector3(0.0, 1.0, 1.0).normalize(),
-    rad
+  const xAxis = new Float32Vector3(1.0, 0.0, 0.0).normalize()
+  const quaternion = Quaternion.rotationAround(xAxis, rad2)
+
+  const cameraPositionVector = quaternion.toRotatedVector3(0.0, 0.0, 10.0)
+  const cameraUpDirectionVector = quaternion.toRotatedVector3(0.0, 1.0, 0.0)
+
+  // ビュー座標変換行列
+  const vMatrix = Matrix4x4.lookAt(
+    cameraPositionVector, // 三次元空間を映し出すカメラを置く
+    new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
+    cameraUpDirectionVector // カメラの上方向
   )
-  const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
+
+  // モデル座標変換行列
+  const mMatrix = Matrix4x4.identity().rotateY(rad)
+  gl.uniformMatrix4fv(program.uMMatrix, false, mMatrix.values)
+
+  // 最終的な座標変換行列
+  const mvpMatrix = pMatrix.mulByMatrix4x4(vMatrix).mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
 
   // モデルの逆行列
   const mInvMatrix = mMatrix.inverse()
   gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrix.values)
 
-  // 平行光源の向き
-  gl.uniform3fv(program.uLightDirection, [-0.5, 0.5, 0.5])
+  // 点光源の位置
+  gl.uniform3fv(program.uLightPosition, lightPosition)
   // 視線ベクトル
-  gl.uniform3fv(program.uEyeDirection, [0.0, 0.0, 20.0])
+  gl.uniform3fv(program.uEyeDirection, cameraPositionVector.values)
   // 環境光の色
-  gl.uniform4fv(program.uAmbientColor, [0.1, 0.1, 0.1, 1.0])
+  gl.uniform4fv(program.uAmbientColor, ambientColor)
 
   // インデックスを用いた描画命令
   gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)
@@ -146,7 +159,7 @@ const render = () => {
 const init = async () => {
   canvas = utils.getCanvas('webgl-canvas')
 
-  canvas.width = 500
+  canvas.width = 300
   canvas.height = 300
 
   gl = utils.getGLContext(canvas)
