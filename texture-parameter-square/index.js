@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w027.html
+// @see https://wgld.org/d/webgl/w028.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -68,13 +68,7 @@ const initBuffers = async () => {
   ]
 
   // テクスチャ座標
-  // prettier-ignore
-  const textureCoord = [
-    0.0, 0.0,
-    1.0, 0.0,
-    0.0, 1.0,
-    1.0, 1.0
-  ]
+  const textureCoord = [-0.75, -0.75, 1.75, -0.75, -0.75, 1.75, 1.75, 1.75]
 
   // 頂点インデックス
   // prettier-ignore
@@ -110,7 +104,7 @@ const initBuffers = async () => {
 
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 2.0, 5.0), // 三次元空間を映し出すカメラを置く
+    new Float32Vector3(0.0, 0.0, 12.0), // 三次元空間を映し出すカメラを置く
     new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
     new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
   )
@@ -125,8 +119,25 @@ const initBuffers = async () => {
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
 
   // テクスチャを生成
-  texture0 = await utils.getTexture(gl, './img/bg-128x128.jpg')
+  texture0 = await utils.getTexture(gl, './img/sky-128x128.jpg')
   texture1 = await utils.getTexture(gl, './img/tetra-128x128.jpg')
+}
+
+/**
+ * 指定した変換を表すモデル行列を生成して描画する関数
+ *
+ * @param {number[]} translate
+ * @param {number} rotateRad
+ */
+const transformDraw = (translate, rotateRad) => {
+  const mMatrix = Matrix4x4.identity()
+    .translate(...translate)
+    .rotateY(rotateRad)
+  const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
+  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
+
+  // インデックスを用いた描画命令
+  gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)
 }
 
 /**
@@ -135,6 +146,12 @@ const initBuffers = async () => {
 const draw = () => {
   // canvasを初期化
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+  // カウンタをインクリメント
+  count++
+
+  // カウンタを元にラジアンを算出
+  const rad = ((count % 360) * Math.PI) / 180
 
   // 1枚目のテクスチャ
   gl.bindTexture(gl.TEXTURE_2D, texture0)
@@ -146,19 +163,69 @@ const draw = () => {
   gl.uniform1i(program.uTexture1, 1)
   gl.activeTexture(gl.TEXTURE1)
 
-  // カウンタをインクリメント
-  count++
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([-6.25, 2.0, 0.0], rad)
 
-  // カウンタを元にラジアンを算出
-  const rad = ((count % 360) * Math.PI) / 180
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([-3.75, 2.0, 0.0], rad)
 
-  // 回転するモデル
-  const mMatrix = Matrix4x4.identity().rotateY(rad)
-  const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
-  gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_MIN_FILTER,
+    gl.NEAREST_MIPMAP_NEAREST
+  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([-1.25, 2.0, 0.0], rad)
 
-  // インデックスを用いた描画命令
-  gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_MIN_FILTER,
+    gl.NEAREST_MIPMAP_LINEAR
+  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([1.25, 2.0, 0.0], rad)
+
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_MIN_FILTER,
+    gl.LINEAR_MIPMAP_NEAREST
+  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([3.75, 2.0, 0.0], rad)
+
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_MIN_FILTER,
+    gl.LINEAR_MIPMAP_LINEAR
+  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([6.25, 2.0, 0.0], rad)
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+  transformDraw([-2.5, -2.0, 0.0], rad)
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT)
+  transformDraw([0.0, -2.0, 0.0], rad)
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  transformDraw([2.5, -2.0, 0.0], rad)
 
   // コンテキストの再描画
   // 画面上にレンダリングされたモデルを描画するためには、コンテキストをリフレッシュする必要がある
@@ -179,8 +246,8 @@ const render = () => {
 const init = async () => {
   canvas = utils.getCanvas('webgl-canvas')
 
-  canvas.width = 500
-  canvas.height = 300
+  canvas.width = 750
+  canvas.height = 450
 
   gl = utils.getGLContext(canvas)
 
