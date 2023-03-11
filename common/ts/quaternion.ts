@@ -33,10 +33,7 @@ export class Quaternion {
    * @return {Quaternion}
    * @memberof Quaternion
    */
-  static rotationAround(
-    normalizedAxis: Float32Vector3,
-    radian: number
-  ): Quaternion {
+  static rotationAround(normalizedAxis: Float32Vector3, radian: number): Quaternion {
     const sin = Math.sin(radian / 2.0)
     const cos = Math.cos(radian / 2.0)
     return new Quaternion(
@@ -71,12 +68,7 @@ export class Quaternion {
    * @memberof Quaternion
    */
   add(other: Quaternion): Quaternion {
-    return new Quaternion(
-      this.x + other.x,
-      this.y + other.y,
-      this.z + other.z,
-      this.w + other.w
-    )
+    return new Quaternion(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w)
   }
 
   /**
@@ -88,12 +80,7 @@ export class Quaternion {
    * @memberof Quaternion
    */
   mulByScalar(scalar: number): Quaternion {
-    return new Quaternion(
-      this.x * scalar,
-      this.y * scalar,
-      this.z * scalar,
-      this.w * scalar
-    )
+    return new Quaternion(this.x * scalar, this.y * scalar, this.z * scalar, this.w * scalar)
   }
 
   /**
@@ -104,9 +91,7 @@ export class Quaternion {
    * @memberof Quaternion
    */
   dot(other: Quaternion): number {
-    return (
-      this.x * other.x + this.y * other.y + this.z * other.z + this.w * other.w
-    )
+    return this.x * other.x + this.y * other.y + this.z * other.z + this.w * other.w
   }
 
   /**
@@ -131,12 +116,8 @@ export class Quaternion {
     const omega: number = Math.acos(dotProd)
     const sinOmega: number = Math.sin(omega)
 
-    const q1: Quaternion = this.mulByScalar(
-      Math.sin((1 - t) * omega) / sinOmega
-    )
-    const q2: Quaternion = otherQuaternion.mulByScalar(
-      Math.sin(t * omega) / sinOmega
-    )
+    const q1: Quaternion = this.mulByScalar(Math.sin((1 - t) * omega) / sinOmega)
+    const q2: Quaternion = otherQuaternion.mulByScalar(Math.sin(t * omega) / sinOmega)
 
     return q1.add(q2)
   }
@@ -149,9 +130,7 @@ export class Quaternion {
    * @memberof Quaternion
    */
   get magnitude(): number {
-    return Math.sqrt(
-      this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w
-    )
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w)
   }
 
   /**

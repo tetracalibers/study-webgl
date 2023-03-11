@@ -99,6 +99,6 @@ export const torus = (
     positions,
     normals,
     colors,
-    index: idxs,
+    index: idxs
   }
 }

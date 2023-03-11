@@ -91,6 +91,6 @@ export const torus = (
   return {
     positions,
     colors,
-    index: idxs,
+    index: idxs
   }
 }

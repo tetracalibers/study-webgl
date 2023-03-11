@@ -40,14 +40,11 @@ const initProgram = async () => {
  */
 const initBuffers = () => {
   // 頂点の位置情報を格納する配列
-  const vertex_position = [
-    0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0,
-  ]
+  const vertex_position = [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0]
 
   // 頂点の色情報を格納する配列
   const vertex_color = [
-    1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-    1.0,
+    1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
   ]
 
   // 頂点のインデックス情報を格納する配列
@@ -61,14 +58,14 @@ const initBuffers = () => {
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertex_position),
     location: program.aVertexPosition,
-    stride: 3, // vec3型
+    stride: 3 // vec3型
   })
 
   // 頂点色情報VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertex_color),
     location: program.aVertexColor,
-    stride: 4, // vec4型
+    stride: 4 // vec4型
   })
 
   // IBO
@@ -86,7 +83,7 @@ const initBuffers = () => {
     fovYRadian: 45, // 視野角を 45 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
-    far: 100, // ファークリップ
+    far: 100 // ファークリップ
   })
   // 共通の変換行列を作っておく
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)

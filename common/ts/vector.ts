@@ -164,11 +164,7 @@ export class Float32Vector3 extends Vector3Base {
    * @memberof Float32Vector3
    */
   add(other: Float32Vector3): Float32Vector3 {
-    return new Float32Vector3(
-      this.x + other.x,
-      this.y + other.y,
-      this.z + other.z
-    )
+    return new Float32Vector3(this.x + other.x, this.y + other.y, this.z + other.z)
   }
 
   /**
@@ -180,11 +176,7 @@ export class Float32Vector3 extends Vector3Base {
    * @memberof Float32Vector3
    */
   sub(other: Float32Vector3): Float32Vector3 {
-    return new Float32Vector3(
-      this.x - other.x,
-      this.y - other.y,
-      this.z - other.z
-    )
+    return new Float32Vector3(this.x - other.x, this.y - other.y, this.z - other.z)
   }
 
   /**

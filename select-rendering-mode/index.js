@@ -88,11 +88,7 @@ const initBuffers = () => {
   trapezoidIndexBuffer = gl.createBuffer()
   // ELEMENT_ARRAY_BUFFER = インデックスデータ
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trapezoidIndexBuffer)
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indices),
-    gl.STATIC_DRAW
-  )
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
   // バッファを使い終えたらバインドを解除
   gl.bindVertexArray(null)
@@ -147,11 +143,7 @@ const draw = () => {
   }
 
   // 描画
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indices),
-    gl.STATIC_DRAW
-  )
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
   gl.drawElements(gl[renderingMode], indices.length, gl.UNSIGNED_SHORT, 0)
 
   // 利用が終わったバッファはバインドを解除
@@ -182,10 +174,10 @@ const initControls = () => {
         'LINES',
         'LINE_LOOP',
         'LINE_STRIP',
-        'POINTS',
+        'POINTS'
       ],
-      onChange: (v) => (renderingMode = v),
-    },
+      onChange: (v) => (renderingMode = v)
+    }
   })
 }
 

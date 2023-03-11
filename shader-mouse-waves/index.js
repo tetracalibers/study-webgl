@@ -38,9 +38,7 @@ const initProgram = async () => {
  */
 const initBuffers = () => {
   /** 頂点 */
-  const vertices = [
-    -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0,
-  ]
+  const vertices = [-1.0, 1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0]
   const indices = [0, 2, 1, 1, 2, 3]
 
   const vPosition = utils.getVBO(gl, vertices)

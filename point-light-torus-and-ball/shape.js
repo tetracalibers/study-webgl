@@ -101,7 +101,7 @@ export const torus = (
     positions,
     normals,
     colors,
-    index: idxs,
+    index: idxs
   }
 }
 
@@ -113,12 +113,7 @@ export const torus = (
  * @param {number} radius - 球の半径
  * @param {number[]} color - RGBA色
  */
-export const sphere = (
-  crossSectionVerticesCount,
-  pipeDivisitionsCount,
-  radius,
-  color
-) => {
+export const sphere = (crossSectionVerticesCount, pipeDivisitionsCount, radius, color) => {
   const row = crossSectionVerticesCount
   const column = pipeDivisitionsCount
 
@@ -171,6 +166,6 @@ export const sphere = (
     positions,
     normals,
     colors,
-    index: idxs,
+    index: idxs
   }
 }

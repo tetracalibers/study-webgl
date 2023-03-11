@@ -3,13 +3,15 @@
   "private": true,
   "scripts": {
     "serve": "node server.js",
-    "compile:ts": "tsc --target es2022 --outDir common/js/dist -d common/ts/index.ts"
+    "compile:ts": "tsc --target es2022 --outDir common/js/dist -d common/ts/index.ts",
+    "format": "prettier . --write"
   },
   "devDependencies": {
     "connect": "^3.7.0",
     "glob": "^8.1.0",
     "jsdom": "^21.1.0",
     "lodash": "^4.17.21",
+    "prettier": "^2.8.4",
     "serve-static": "^1.15.0"
   }
 }

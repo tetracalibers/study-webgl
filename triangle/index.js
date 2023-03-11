@@ -56,14 +56,7 @@ const initBuffers = () => {
   // attribute属性を有効にする
   gl.enableVertexAttribArray(program.aVertexPosition)
   // attribute属性を登録
-  gl.vertexAttribPointer(
-    program.aVertexPosition,
-    attStride,
-    gl.FLOAT,
-    false,
-    0,
-    0
-  )
+  gl.vertexAttribPointer(program.aVertexPosition, attStride, gl.FLOAT, false, 0, 0)
 
   // モデル座標変換行列
   const mMatrix = Matrix4x4.identity()
@@ -78,7 +71,7 @@ const initBuffers = () => {
     fovYRadian: 90, // 視野角を 90 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
-    far: 100, // ファークリップ
+    far: 100 // ファークリップ
   })
   // 各行列を掛け合わせ座標変換行列を完成させる
   const mvpMatrix = pMatrix.mulByMatrix4x4(vMatrix).mulByMatrix4x4(mMatrix)

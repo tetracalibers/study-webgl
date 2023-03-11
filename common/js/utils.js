@@ -185,11 +185,7 @@ const getIBO = (gl, indices) => {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
 
   // バッファにデータをセット
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Int16Array(indices),
-    gl.STATIC_DRAW
-  )
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(indices), gl.STATIC_DRAW)
 
   // バッファのバインドを無効化
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
@@ -246,14 +242,7 @@ const setAttribute = (gl, attribute) => {
   gl.enableVertexAttribArray(attribute.location)
 
   // attributeLocationを通知し登録する
-  gl.vertexAttribPointer(
-    attribute.location,
-    attribute.stride,
-    gl.FLOAT,
-    false,
-    0,
-    0
-  )
+  gl.vertexAttribPointer(attribute.location, attribute.stride, gl.FLOAT, false, 0, 0)
 }
 
 /**
@@ -268,13 +257,10 @@ const configureControls = (settings, options = { width: 300 }) => {
   const isAction = (v) => typeof v === 'function'
 
   const isFolder = (v) =>
-    !isAction(v) &&
-    typeof v === 'object' &&
-    (v.value === null || v.value === undefined)
+    !isAction(v) && typeof v === 'object' && (v.value === null || v.value === undefined)
 
   const isColor = (v) =>
-    (typeof v === 'string' && ~v.indexOf('#')) ||
-    (Array.isArray(v) && v.length >= 3)
+    (typeof v === 'string' && ~v.indexOf('#')) || (Array.isArray(v) && v.length >= 3)
 
   Object.keys(settings).forEach((key) => {
     const settingValue = settings[key]
@@ -287,14 +273,7 @@ const configureControls = (settings, options = { width: 300 }) => {
       return utils.configureControls(settingValue, { gui: gui.addFolder(key) })
     }
 
-    const {
-      value,
-      min,
-      max,
-      step,
-      options,
-      onChange = () => null,
-    } = settingValue
+    const { value, min, max, step, options, onChange = () => null } = settingValue
 
     state[key] = value
 
@@ -323,5 +302,5 @@ export const utils = {
   getIBO,
   getTexture,
   setAttribute,
-  configureControls,
+  configureControls
 }

@@ -81,21 +81,21 @@ const initBuffers = async () => {
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertexPosition),
     location: program.aVertexPosition,
-    stride: 3, // vec3型
+    stride: 3 // vec3型
   })
 
   // 頂点色VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertexColor),
     location: program.aVertexColor,
-    stride: 4, // vec4型
+    stride: 4 // vec4型
   })
 
   // テクスチャ座標VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, textureCoord),
     location: program.aTextureCoord,
-    stride: 2, // vec2型（xy座標）
+    stride: 2 // vec2型（xy座標）
   })
 
   // IBO
@@ -113,7 +113,7 @@ const initBuffers = async () => {
     fovYRadian: 45, // 視野角を 45 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
-    far: 100, // ファークリップ
+    far: 100 // ファークリップ
   })
   // 共通の変換行列を作っておく
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
@@ -175,41 +175,25 @@ const draw = () => {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
   transformDraw([-3.75, 2.0, 0.0], rad)
 
-  gl.texParameteri(
-    gl.TEXTURE_2D,
-    gl.TEXTURE_MIN_FILTER,
-    gl.NEAREST_MIPMAP_NEAREST
-  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
   transformDraw([-1.25, 2.0, 0.0], rad)
 
-  gl.texParameteri(
-    gl.TEXTURE_2D,
-    gl.TEXTURE_MIN_FILTER,
-    gl.NEAREST_MIPMAP_LINEAR
-  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
   transformDraw([1.25, 2.0, 0.0], rad)
 
-  gl.texParameteri(
-    gl.TEXTURE_2D,
-    gl.TEXTURE_MIN_FILTER,
-    gl.LINEAR_MIPMAP_NEAREST
-  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
   transformDraw([3.75, 2.0, 0.0], rad)
 
-  gl.texParameteri(
-    gl.TEXTURE_2D,
-    gl.TEXTURE_MIN_FILTER,
-    gl.LINEAR_MIPMAP_LINEAR
-  )
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)

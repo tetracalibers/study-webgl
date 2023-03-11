@@ -52,14 +52,14 @@ const initBuffers = () => {
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertex_position),
     location: program.aVertexPosition,
-    stride: 3, // vec3型
+    stride: 3 // vec3型
   })
 
   // 頂点色情報VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertex_color),
     location: program.aVertexColor,
-    stride: 4, // vec4型
+    stride: 4 // vec4型
   })
 
   // ビュー座標変換行列
@@ -73,7 +73,7 @@ const initBuffers = () => {
     fovYRadian: 90, // 視野角を 90 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
-    far: 100, // ファークリップ
+    far: 100 // ファークリップ
   })
   // 共通の変換行列を作っておく
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
@@ -108,9 +108,7 @@ const draw = () => {
 
   // モデル3は拡大縮小する
   const s = Math.sin(rad) + 1.0
-  const m3Matrix = Matrix4x4.identity()
-    .translate(-1.0, -1.0, 0.0)
-    .scale(s, s, 0.0)
+  const m3Matrix = Matrix4x4.identity().translate(-1.0, -1.0, 0.0).scale(s, s, 0.0)
   const mvp3Matrix = pvMatrix.mulByMatrix4x4(m3Matrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvp3Matrix.values)
   gl.drawArrays(gl.TRIANGLES, 0, 3)

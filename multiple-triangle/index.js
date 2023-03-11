@@ -63,14 +63,14 @@ const initBuffers = () => {
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertex_position),
     location: program.aVertexPosition,
-    stride: 3, // vec3型
+    stride: 3 // vec3型
   })
 
   // 頂点色情報VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, vertex_color),
     location: program.aVertexColor,
-    stride: 4, // vec4型
+    stride: 4 // vec4型
   })
 
   // ビュー座標変換行列
@@ -84,7 +84,7 @@ const initBuffers = () => {
     fovYRadian: 90, // 視野角を 90 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
-    far: 100, // ファークリップ
+    far: 100 // ファークリップ
   })
   // 共通の変換行列を作っておく
   const pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)

@@ -182,10 +182,7 @@ export class Matrix4x4 implements Matrix {
    * @return {Matrix4x4}
    * @memberof Matrix4x4
    */
-  static rotationAround(
-    normalizedAxis: Float32Vector3,
-    radian: number
-  ): Matrix4x4 {
+  static rotationAround(normalizedAxis: Float32Vector3, radian: number): Matrix4x4 {
     const q = Quaternion.rotationAround(normalizedAxis, radian)
     return q.toRotationMatrix4()
   }
@@ -309,7 +306,7 @@ export class Matrix4x4 implements Matrix {
       left,
       right,
       near: argsObject.near,
-      far: argsObject.far,
+      far: argsObject.far
     })
   }
 

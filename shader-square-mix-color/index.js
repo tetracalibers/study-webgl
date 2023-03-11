@@ -33,9 +33,7 @@ const initProgram = async () => {
  */
 const initBuffers = () => {
   /** 頂点 */
-  const vertices = [
-    -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5,
-  ]
+  const vertices = [-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]
 
   const vertexBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
@@ -50,14 +48,7 @@ const initBuffers = () => {
   const normalize = false
   const stride = 0
   const offset = 0
-  gl.vertexAttribPointer(
-    program.aVertexPosition,
-    size,
-    type,
-    normalize,
-    stride,
-    offset
-  )
+  gl.vertexAttribPointer(program.aVertexPosition, size, type, normalize, stride, offset)
   gl.enableVertexAttribArray(program.aVertexPosition)
 
   // バッファを使い終えたらバインドを解除

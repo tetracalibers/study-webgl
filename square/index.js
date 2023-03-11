@@ -145,11 +145,7 @@ const initBuffers = () => {
   squareIndexBuffer = gl.createBuffer()
   // ELEMENT_ARRAY_BUFFER = インデックスデータ
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer)
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indices),
-    gl.STATIC_DRAW
-  )
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
   // バッファを使い終えたらバインドを解除
   gl.bindVertexArray(null)

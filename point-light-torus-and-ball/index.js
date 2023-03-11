@@ -61,21 +61,21 @@ const setShapeBuffers = (shape) => {
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, shape.positions),
     location: program.aVertexPosition,
-    stride: 3, // vec3型
+    stride: 3 // vec3型
   })
 
   // 法線情報VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, shape.normals),
     location: program.aNormal,
-    stride: 3,
+    stride: 3
   })
 
   // 頂点色情報VBO
   utils.setAttribute(gl, {
     vbo: utils.getVBO(gl, shape.colors),
     location: program.aVertexColor,
-    stride: 4, // vec4型
+    stride: 4 // vec4型
   })
 
   // IBO
@@ -98,7 +98,7 @@ const initBuffers = () => {
     fovYRadian: 45, // 視野角を 45 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
-    far: 100, // ファークリップ
+    far: 100 // ファークリップ
   })
   // 共通の変換行列を作っておく
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
