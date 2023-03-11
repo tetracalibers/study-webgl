@@ -30,10 +30,10 @@ const initProgram = async () => {
 
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
-  program.aTextureCoord = gl.getAttribLocation(program, 'a_textureCoord')
+  //program.aTextureCoord = gl.getAttribLocation(program, 'a_textureCoord')
 
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
-  program.uTexture = gl.getUniformLocation(program, 'u_texture')
+  //program.uTexture = gl.getUniformLocation(program, 'u_texture')
 
   gl.useProgram(program)
 }
@@ -64,16 +64,16 @@ const initBuffers = async () => {
 
   // テクスチャ座標
   // prettier-ignore
-  const textureCoord = [
-    0.0, 0.0,
-    1.0, 0.0,
-    0.0, 1.0,
-    1.0, 1.0
-  ]
+  //const textureCoord = [
+  //  0.0, 0.0,
+  //  1.0, 0.0,
+  //  0.0, 1.0,
+  //  1.0, 1.0
+  //]
 
   // 頂点インデックス
   // prettier-ignore
-  const index = [
+  index = [
     0, 1, 2,
     3, 2, 1
   ]
@@ -93,11 +93,11 @@ const initBuffers = async () => {
   })
 
   // テクスチャ座標VBO
-  utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, textureCoord),
-    location: program.aTextureCoord,
-    stride: 2, // vec2型（xy座標）
-  })
+  //utils.setAttribute(gl, {
+  //  vbo: utils.getVBO(gl, textureCoord),
+  //  location: program.aTextureCoord,
+  //  stride: 2, // vec2型（xy座標）
+  //})
 
   // IBO
   const ibo = utils.getIBO(gl, index)
@@ -119,12 +119,12 @@ const initBuffers = async () => {
   // 共通の変換行列を作っておく
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
 
-  const { texture } = utils.getTexture(gl, './img/tomixy-64x64.jpg')
-  // 有効にするテクスチャユニットを指定
-  // 使うテクスチャが一つなので、そのまま0番目のユニットを使う
-  gl.activeTexture(gl.TEXTURE0)
-  gl.bindTexture(gl.TEXTURE_2D, texture)
-  gl.uniform1i(program.uTexture, 0)
+  //const { texture } = utils.getTexture(gl, './img/tomixy-64x64.jpg')
+  //// 有効にするテクスチャユニットを指定
+  //// 使うテクスチャが一つなので、そのまま0番目のユニットを使う
+  //gl.activeTexture(gl.TEXTURE0)
+  //gl.bindTexture(gl.TEXTURE_2D, texture)
+  //gl.uniform1i(program.uTexture, 0)
 }
 
 /**
