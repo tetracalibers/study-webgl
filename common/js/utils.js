@@ -246,6 +246,27 @@ const setAttribute = (gl, attribute) => {
 }
 
 /**
+ * ブレンドタイプに応じてブレンドファクターを設定する関数
+ *
+ * @param {WebGL2RenderingContext} gl
+ * @param {'transparency' | 'add'} mode
+ */
+const setBlendFactor = (gl, mode) => {
+  switch (mode) {
+    // 透過処理
+    case 'transparency':
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      break
+    // 加算合成
+    case 'add':
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
+      break
+    default:
+      break
+  }
+}
+
+/**
  * lil-guiによるGUIコントロール作成
  * @param {*} settings
  * @param {*} [options={ width: 300 }]
@@ -302,5 +323,6 @@ export const utils = {
   getIBO,
   getTexture,
   setAttribute,
+  setBlendFactor,
   configureControls
 }
