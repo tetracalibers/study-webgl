@@ -1,9 +1,8 @@
-// @see https://wgld.org/d/webgl/w023.html
+// @see https://wgld.org/d/webgl/w026.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
 import { Float32Vector3 } from '../common/js/dist/vector.js'
-import { torus } from './torus.js'
 
 /** @type {HTMLCanvasElement | null} */
 let canvas = null
@@ -30,14 +29,11 @@ const initProgram = async () => {
   program = utils.getProgram(gl, vertexShader, fragmentShader)
 
   program.aVertexPosition = gl.getAttribLocation(program, 'a_position')
-  program.aNormal = gl.getAttribLocation(program, 'a_normal')
   program.aVertexColor = gl.getAttribLocation(program, 'a_color')
+  program.aTextureCoord = gl.getAttribLocation(program, 'a_textureCoord')
 
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
-  program.uMInvMatrix = gl.getUniformLocation(program, 'u_mInvMatrix')
-  program.uLightDirection = gl.getUniformLocation(program, 'u_lightDirection')
-  program.uEyeDirection = gl.getUniformLocation(program, 'u_eyeDirection')
-  program.uAmbientColor = gl.getUniformLocation(program, 'u_ambientColor')
+  program.uTexture = gl.getUniformLocation(program, 'u_texture')
 
   gl.useProgram(program)
 }
@@ -45,30 +41,62 @@ const initProgram = async () => {
 /**
  * バッファを準備する関数
  */
-const initBuffers = () => {
-  const torusData = torus(32, 32, 1.0, 2.0)
-  const { positions, colors, normals } = torusData
-  index = torusData.index
+const initBuffers = async () => {
+  // 頂点位置
+  // 原点を中心に、アルファベットの Z を描くような順序で頂点を定義
+  // prettier-ignore
+  const vertexPosition = [
+    -1.0, 1.0, 0.0,
+    1.0, 1.0, 0.0,
+    -1.0, -1.0, 0.0,
+    1.0, -1.0, 0.0,
+  ]
 
-  // 頂点位置情報VBO
+  // 頂点色
+  // 全て不透明な白
+  // prettier-ignore
+  const vertexColor = [
+    1.0, 1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0,
+  ]
+
+  // テクスチャ座標
+  // prettier-ignore
+  const textureCoord = [
+    0.0, 0.0,
+    1.0, 0.0,
+    0.0, 1.0,
+    1.0, 1.0
+  ]
+
+  // 頂点インデックス
+  // prettier-ignore
+  const index = [
+    0, 1, 2,
+    3, 2, 1
+  ]
+
+  // 頂点位置VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, positions),
+    vbo: utils.getVBO(gl, vertexPosition),
     location: program.aVertexPosition,
     stride: 3, // vec3型
   })
 
-  // 法線情報VBO
+  // 頂点色VBO
   utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, normals),
-    location: program.aNormal,
-    stride: 3,
-  })
-
-  // 頂点色情報VBO
-  utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, colors),
+    vbo: utils.getVBO(gl, vertexColor),
     location: program.aVertexColor,
     stride: 4, // vec4型
+  })
+
+  // テクスチャ座標VBO
+  utils.setAttribute(gl, {
+    vbo: utils.getVBO(gl, textureCoord),
+    location: program.aTextureCoord,
+    stride: 2, // vec2型（xy座標）
   })
 
   // IBO
@@ -77,7 +105,7 @@ const initBuffers = () => {
 
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 0.0, 20.0), // 三次元空間を映し出すカメラを後ろに 20.0 移動した状態で置く
+    new Float32Vector3(0.0, 2.0, 5.0), // 三次元空間を映し出すカメラを置く
     new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
     new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
   )
@@ -90,6 +118,13 @@ const initBuffers = () => {
   })
   // 共通の変換行列を作っておく
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
+
+  const { texture } = utils.getTexture(gl, './img/tomixy-64x64.jpg')
+  // 有効にするテクスチャユニットを指定
+  // 使うテクスチャが一つなので、そのまま0番目のユニットを使う
+  gl.activeTexture(gl.TEXTURE0)
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.uniform1i(program.uTexture, 0)
 }
 
 /**
@@ -106,23 +141,9 @@ const draw = () => {
   const rad = ((count % 360) * Math.PI) / 180
 
   // 回転するモデル
-  const mMatrix = Matrix4x4.identity().rotateAround(
-    new Float32Vector3(0.0, 1.0, 1.0).normalize(),
-    rad
-  )
+  const mMatrix = Matrix4x4.identity().rotateY(rad)
   const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
-
-  // モデルの逆行列
-  const mInvMatrix = mMatrix.inverse()
-  gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrix.values)
-
-  // 平行光源の向き
-  gl.uniform3fv(program.uLightDirection, [-0.5, 0.5, 0.5])
-  // 視線ベクトル
-  gl.uniform3fv(program.uEyeDirection, [0.0, 0.0, 20.0])
-  // 環境光の色
-  gl.uniform4fv(program.uAmbientColor, [0.1, 0.1, 0.1, 1.0])
 
   // インデックスを用いた描画命令
   gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)
@@ -156,14 +177,13 @@ const init = async () => {
   // canvasを初期化する際の深度を設定する
   gl.clearDepth(1.0)
 
-  // カリングと深度テストを有効にする
+  // 深度テストを有効にする
   gl.enable(gl.DEPTH_TEST)
   gl.depthFunc(gl.LEQUAL)
-  gl.enable(gl.CULL_FACE)
 
   // 適切な順序で関数を呼び出す
   await initProgram()
-  initBuffers()
+  await initBuffers()
   render()
 }
 
