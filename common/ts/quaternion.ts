@@ -105,6 +105,26 @@ export class Quaternion {
   }
 
   /**
+   * Multiply by `other` quaternion and returns a product.
+   * This method does not mutate the quaternion.
+   *
+   * @param {Quaternion} other
+   * @return {Quaternion}
+   * @memberof Quaternion
+   */
+  multiply(other: Quaternion): Quaternion {
+    const a = this
+    const b = other
+
+    return new Quaternion(
+      a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z, // 1
+      a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y, // i
+      a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x, // j
+      a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w // k
+    )
+  }
+
+  /**
    * Calculates spherical linear interpolation(also known as Slerp) and returns new `Quaternion` between the quaternion and the other.
    *
    * @param {Quaternion} other
