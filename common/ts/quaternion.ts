@@ -45,6 +45,16 @@ export class Quaternion {
   }
 
   /**
+   * Returns a conjugate quaternion.
+   *
+   * @type {Quaternion}
+   * @memberof Quaternion
+   */
+  conj(): Quaternion {
+    return new Quaternion(-1 * this.x, -1 * this.y, -1 * this.z, this.w)
+  }
+
+  /**
    * Returns a normalized quaternion.
    *
    * @return {Quaternion}
