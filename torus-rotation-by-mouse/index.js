@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w032.html
+// @see https://wgld.org/d/webgl/w033.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -17,7 +17,8 @@ let program = null
 let index = []
 
 /** @type {Matrix4x4} */
-let pMatrix
+let pvMatrix
+let rotationByMouse = Matrix4x4.identity()
 
 let count = 0
 
@@ -25,6 +26,33 @@ let count = 0
 const lightPosition = [15.0, 10.0, 15.0]
 // 環境光の色
 const ambientColor = [0.1, 0.1, 0.1, 1.0]
+
+// カメラの座標
+const cameraPosition = [0.0, 0.0, 10.0]
+// カメラの上方向を表すベクトル
+const cameraUpDirection = [0.0, 1.0, 0.0]
+
+/**
+ * イベントから取得したマウス座標をもとに回転軸ベクトルと回転角を割り出し、
+ * クォータニオンを更新する関数
+ *
+ * @param {MouseEvent} e
+ */
+const calcQuaternionFromMousePosition = (e) => {
+  const cvsW = canvas.width
+  const cvsH = canvas.height
+  const cvsNorm = Math.sqrt(cvsW * cvsW + cvsH * cvsH)
+  // マウス座標をキャンバス内の座標に変換した上で
+  let x = e.clientX - canvas.offsetLeft
+  let y = e.clientY - canvas.offsetTop
+  // キャンバス中央からの相対的な座標に変換
+  x -= cvsW * 0.5
+  y -= cvsH * 0.5
+  const mouseNorm = Math.sqrt(x * x + y * y)
+  const angle = (mouseNorm * 2.0 * Math.PI) / cvsNorm
+  const axis = new Float32Vector3(y, x, 0.0).normalize()
+  rotationByMouse = Quaternion.rotationAround(axis, angle).toRotationMatrix4()
+}
 
 /**
  * 適切な頂点シェーダーとフラグメントシェーダーでプログラムを作成する関数
@@ -82,13 +110,22 @@ const initBuffers = () => {
   const ibo = utils.getIBO(gl, index)
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
 
+  // ビュー座標変換行列
+  const vMatrix = Matrix4x4.lookAt(
+    new Float32Vector3(...cameraPosition), // 三次元空間を映し出すカメラを置く
+    new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
+    new Float32Vector3(...cameraUpDirection) // カメラの上方向
+  )
+
   // プロジェクション座標変換行列
-  pMatrix = Matrix4x4.perspective({
+  const pMatrix = Matrix4x4.perspective({
     fovYRadian: 45, // 視野角を 45 度
     aspectRatio: canvas.width / canvas.height, // アスペクト比は canvas のサイズそのまま
     near: 0.1, // ニアクリップ
     far: 100 // ファークリップ
   })
+
+  pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
 }
 
 /**
@@ -103,27 +140,15 @@ const draw = () => {
 
   // カウンタを元にラジアンを算出
   const rad = ((count % 180) * Math.PI) / 90
-  const rad2 = ((count % 720) * Math.PI) / 360
-
-  const xAxis = new Float32Vector3(1.0, 0.0, 0.0).normalize()
-  const quaternion = Quaternion.rotationAround(xAxis, rad2)
-
-  const cameraPositionVector = quaternion.toRotatedVector3(0.0, 0.0, 10.0)
-  const cameraUpDirectionVector = quaternion.toRotatedVector3(0.0, 1.0, 0.0)
-
-  // ビュー座標変換行列
-  const vMatrix = Matrix4x4.lookAt(
-    cameraPositionVector, // 三次元空間を映し出すカメラを置く
-    new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
-    cameraUpDirectionVector // カメラの上方向
-  )
 
   // モデル座標変換行列
-  const mMatrix = Matrix4x4.identity().rotateY(rad)
+  // マウスに応じて回転する
+  // マウスを動かさなくても自動的にy軸中心回転するようにする
+  const mMatrix = Matrix4x4.identity().mulByMatrix4x4(rotationByMouse).rotateY(rad)
   gl.uniformMatrix4fv(program.uMMatrix, false, mMatrix.values)
 
   // 最終的な座標変換行列
-  const mvpMatrix = pMatrix.mulByMatrix4x4(vMatrix).mulByMatrix4x4(mMatrix)
+  const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
 
   // モデルの逆行列
@@ -133,7 +158,7 @@ const draw = () => {
   // 点光源の位置
   gl.uniform3fv(program.uLightPosition, lightPosition)
   // 視線ベクトル
-  gl.uniform3fv(program.uEyeDirection, cameraPositionVector.values)
+  gl.uniform3fv(program.uEyeDirection, cameraPosition)
   // 環境光の色
   gl.uniform4fv(program.uAmbientColor, ambientColor)
 
@@ -161,6 +186,8 @@ const init = async () => {
 
   canvas.width = 300
   canvas.height = 300
+
+  canvas.addEventListener('mousemove', calcQuaternionFromMousePosition, true)
 
   gl = utils.getGLContext(canvas)
 
