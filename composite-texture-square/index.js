@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w026.html
+// @see https://wgld.org/d/webgl/w027.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -11,7 +11,9 @@ let gl = null
 /** @type {WebGLProgram | null} */
 let program = null
 /** @type {WebGLTexture | null} */
-let texture = null
+let texture0 = null
+/** @type {WebGLTexture | null} */
+let texture1 = null
 
 /** @type {number[]} */
 let index = []
@@ -35,7 +37,8 @@ const initProgram = async () => {
   program.aTextureCoord = gl.getAttribLocation(program, 'a_textureCoord')
 
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
-  program.uTexture = gl.getUniformLocation(program, 'u_texture')
+  program.uTexture0 = gl.getUniformLocation(program, 'u_texture0')
+  program.uTexture1 = gl.getUniformLocation(program, 'u_texture1')
 
   gl.useProgram(program)
 }
@@ -122,10 +125,8 @@ const initBuffers = async () => {
   pvMatrix = pMatrix.mulByMatrix4x4(vMatrix)
 
   // テクスチャを生成
-  texture = await utils.getTexture(gl, './img/tomixy-64x64.jpg')
-  // 有効にするテクスチャユニットを指定
-  // 使うテクスチャが一つなので、そのまま0番目のユニットを使う
-  gl.activeTexture(gl.TEXTURE0)
+  texture0 = await utils.getTexture(gl, './img/bg-128x128.jpg')
+  texture1 = await utils.getTexture(gl, './img/tetra-128x128.jpg')
 }
 
 /**
@@ -135,9 +136,15 @@ const draw = () => {
   // canvasを初期化
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-  // テクスチャをバインドしてuniform変数に登録
-  gl.bindTexture(gl.TEXTURE_2D, texture)
-  gl.uniform1i(program.uTexture, 0)
+  // 1枚目のテクスチャ
+  gl.bindTexture(gl.TEXTURE_2D, texture0)
+  gl.uniform1i(program.uTexture0, 0)
+  gl.activeTexture(gl.TEXTURE0)
+
+  // 2枚目のテクスチャ
+  gl.bindTexture(gl.TEXTURE_2D, texture1)
+  gl.uniform1i(program.uTexture1, 1)
+  gl.activeTexture(gl.TEXTURE1)
 
   // カウンタをインクリメント
   count++
