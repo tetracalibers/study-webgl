@@ -316,6 +316,23 @@ export class Quaternion {
   }
 
   /**
+   * Convert the quaternion to a rotated vector.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   * @return {Float32Vector3}
+   * @memberof Quaternion
+   */
+  toRotatedVector3(x: number, y: number, z: number): Float32Vector3 {
+    const rotation = this
+    const conjRotation = this.conj()
+    const target = new Quaternion(x, y, z, 0.0)
+    const result = conjRotation.multiply(target).multiply(rotation)
+    return new Float32Vector3(result.x, result.y, result.z)
+  }
+
+  /**
    * Returns values as `String`.
    *
    * @return {string}
