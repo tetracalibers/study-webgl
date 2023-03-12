@@ -18,10 +18,11 @@ const getCanvas = (id) => {
 /**
  * 与えられたcanvas要素のWebGL2コンテキストを返す
  * @param {HTMLCanvasElement} canvas
+ * @param {WebGLContextAttributes} options
  * @return {WebGL2RenderingContext | null}
  */
-const getGLContext = (canvas) => {
-  const ctx = canvas.getContext('webgl2')
+const getGLContext = (canvas, options) => {
+  const ctx = canvas.getContext('webgl2', options)
   if (!ctx) {
     console.error('WebGL2 is not available on your browser.')
     return null
