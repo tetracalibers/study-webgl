@@ -129,6 +129,7 @@ export const sphere = (crossSectionVerticesCount, pipeDivisitionsCount, radius, 
   let positions = []
   let normals = []
   let colors = []
+  let texCoords = []
   let idxs = []
 
   // 断面円周の頂点の数だけループ
@@ -157,6 +158,9 @@ export const sphere = (crossSectionVerticesCount, pipeDivisitionsCount, radius, 
       const rz = cx * Math.sin(sRad)
       normals.push(rx, ry, rz)
 
+      // テクスチャ座標
+      texCoords.push(1 - (1 / column) * j, (1 / row) * i)
+
       // 処理中の断面円の色
       const tc = color ? color : hsvaToRgba((360 / row) * i, 1, 1, 1)
       colors.push(...tc)
@@ -175,6 +179,7 @@ export const sphere = (crossSectionVerticesCount, pipeDivisitionsCount, radius, 
     positions,
     normals,
     colors,
+    texCoords,
     index: idxs
   }
 }
