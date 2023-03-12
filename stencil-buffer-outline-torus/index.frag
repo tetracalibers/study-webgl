@@ -4,6 +4,7 @@
 precision highp float;
 
 uniform sampler2D u_texture;
+uniform bool u_isUseTexture;
 
 // 頂点シェーダーから受け取る
 in vec4 v_Color;
@@ -12,7 +13,11 @@ in vec2 v_TextureCoord;
 out vec4 outColor;
 
 void main() {
-  vec4 smpColor = texture(u_texture, v_TextureCoord);
-  // 透明度を調整したのは単なる好み
-  outColor = vec4(v_Color.rgb, 0.5) * smpColor;
+  vec4 smpColor = vec4(1.0);
+  
+  if (u_isUseTexture) {
+    smpColor = texture(u_texture, v_TextureCoord);
+  }
+  
+  outColor = v_Color * smpColor;
 }

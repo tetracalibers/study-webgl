@@ -55,6 +55,7 @@ export const torus = (
   let positions = []
   let normals = []
   let colors = []
+  let texCoords = []
   let idxs = []
 
   // 断面円周の頂点の数だけループ
@@ -83,6 +84,13 @@ export const torus = (
       const rz = cx * Math.sin(tRad)
       normals.push(rx, ry, rz)
 
+      // テクスチャ座標
+      const rs = (1 / column) * j
+      let rt = (1 / row) * i + 0.5
+      rt = rt > 1.0 ? rt - 1.0 : rt
+      rt = 1.0 - rt
+      texCoords.push(rs, rt)
+
       // 処理中の断面円の色
       const tc = color ? color : hsvaToRgba((360 / column) * j, 1, 1, 1)
       colors.push(...tc)
@@ -101,6 +109,7 @@ export const torus = (
     positions,
     normals,
     colors,
+    texCoords,
     index: idxs
   }
 }

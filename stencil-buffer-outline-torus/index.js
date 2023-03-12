@@ -1,9 +1,10 @@
-// @see https://wgld.org/d/webgl/w038.html
+// @see https://wgld.org/d/webgl/w039.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
 import { Float32Vector3 } from '../common/js/dist/vector.js'
 import { Quaternion } from '../common/js/dist/quaternion.js'
+import { torus, sphere } from './shape.js'
 
 /** @type {HTMLCanvasElement | null} */
 let canvas = null
@@ -14,17 +15,35 @@ let program = null
 /** @type {WebGLTexture | null} */
 let texture = null
 
-/** @type {number[]} */
-let index = []
-
 /** @type {Matrix4x4} */
 let pMatrix
 /** @type {Matrix4x4} */
 let pvMatrix
 let rotationByMouse = Matrix4x4.identity()
 
+/** @type {{ position: WebGLBuffer; normal: WebGLBuffer; color: WebGLBuffer; texCoords: WebGLBuffer; index: WebGLBuffer; length: number }} */
+let sphereBuffer = {
+  position: null,
+  normal: null,
+  color: null,
+  texCoords: null,
+  index: null,
+  length: 0
+}
+/** @type {{ position: WebGLBuffer; normal: WebGLBuffer; color: WebGLBuffer; texCoords: WebGLBuffer; index: WebGLBuffer; length: number }} */
+let torusBuffer = {
+  position: null,
+  normal: null,
+  color: null,
+  texCoords: null,
+  index: null,
+  length: 0
+}
+
 // ライトベクトル
 const lightDirection = [1.0, 1.0, 1.0]
+
+let count = 0
 
 /**
  * イベントから取得したマウス座標をもとに回転軸ベクトルと回転角を割り出し、
@@ -65,7 +84,10 @@ const initProgram = async () => {
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
   program.uMInvMatrix = gl.getUniformLocation(program, 'u_mInvMatrix')
   program.uLightDirection = gl.getUniformLocation(program, 'u_lightDirection')
+  program.uIsUseLight = gl.getUniformLocation(program, 'u_isUseLight')
   program.uTexture = gl.getUniformLocation(program, 'u_texture')
+  program.uIsUseTexture = gl.getUniformLocation(program, 'u_isUseTexture')
+  program.uIsDrawOutline = gl.getUniformLocation(program, 'u_isDrawOutline')
 
   gl.useProgram(program)
 }
@@ -74,43 +96,23 @@ const initProgram = async () => {
  * バッファを準備する関数
  */
 const initBuffers = async () => {
-  const position = [-1.0, 1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0]
-  const normal = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-  const color = [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-  const textureCoord = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-  index = [0, 1, 2, 3, 2, 1]
+  const torusData = torus(64, 64, 0.25, 1.0)
 
-  // 頂点位置情報VBO
-  utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, position),
-    location: program.aVertexPosition,
-    stride: 3 // vec3型
-  })
+  torusBuffer.position = utils.getVBO(gl, torusData.positions)
+  torusBuffer.normal = utils.getVBO(gl, torusData.normals)
+  torusBuffer.color = utils.getVBO(gl, torusData.colors)
+  torusBuffer.texCoords = utils.getVBO(gl, torusData.texCoords)
+  torusBuffer.index = utils.getIBO(gl, torusData.index)
+  torusBuffer.length = torusData.index.length
 
-  // 法線情報VBO
-  utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, normal),
-    location: program.aNormal,
-    stride: 3
-  })
+  const sphereData = sphere(64, 64, 1.0, [1.0, 1.0, 1.0, 1.0])
 
-  // 頂点色情報VBO
-  utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, color),
-    location: program.aVertexColor,
-    stride: 4 // vec4型
-  })
-
-  // テクスチャ座標VBO
-  utils.setAttribute(gl, {
-    vbo: utils.getVBO(gl, textureCoord),
-    location: program.aTextureCoord,
-    stride: 2 // vec2型（xy座標）
-  })
-
-  // IBO
-  const ibo = utils.getIBO(gl, index)
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
+  sphereBuffer.position = utils.getVBO(gl, sphereData.positions)
+  sphereBuffer.normal = utils.getVBO(gl, sphereData.normals)
+  sphereBuffer.color = utils.getVBO(gl, sphereData.colors)
+  sphereBuffer.texCoords = utils.getVBO(gl, sphereData.texCoords)
+  sphereBuffer.index = utils.getIBO(gl, sphereData.index)
+  sphereBuffer.length = sphereData.index.length
 
   // プロジェクション座標変換行列
   pMatrix = Matrix4x4.perspective({
@@ -125,27 +127,55 @@ const initBuffers = async () => {
 }
 
 /**
- * 四角形をtranslateさせて描画する関数
+ * 図形を描画する関数
  *
- * @param {number} tx
- * @param {number} ty
- * @param {number} tz
+ * @param {Object} data
+ * @param {WebGLBuffer} data.position
+ * @param {WebGLBuffer} data.normal
+ * @param {WebGLBuffer} data.color
+ * @param {WebGLBuffer} data.texCoords
+ * @param {WebGLBuffer} data.index
+ * @param {number} data.length
+ * @param {Matrix4x4} mMatrix
  */
-const drawSquare = (tx, ty, tz) => {
-  // モデル
-  const mMatrix = Matrix4x4.identity().translate(tx, ty, tz)
+const drawShape = (data, mMatrix) => {
+  // 頂点位置情報VBO
+  utils.setAttribute(gl, {
+    vbo: data.position,
+    location: program.aVertexPosition,
+    stride: 3 // vec3型
+  })
+
+  // 法線情報VBO
+  utils.setAttribute(gl, {
+    vbo: data.normal,
+    location: program.aNormal,
+    stride: 3
+  })
+
+  // 頂点色情報VBO
+  utils.setAttribute(gl, {
+    vbo: data.color,
+    location: program.aVertexColor,
+    stride: 4 // vec4型
+  })
+
+  // テクスチャ座標VBO
+  utils.setAttribute(gl, {
+    vbo: data.texCoords,
+    location: program.aTextureCoord,
+    stride: 2 // vec2型（xy座標）
+  })
+
+  // IBO
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, data.index)
+
+  // 変換行列
   const mvpMatrix = pvMatrix.mulByMatrix4x4(mMatrix)
   gl.uniformMatrix4fv(program.uMvpMatrix, false, mvpMatrix.values)
 
-  // モデルの逆行列
-  const mInvMatrix = mMatrix.inverse()
-  gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrix.values)
-
-  // 平行光源の向き
-  gl.uniform3fv(program.uLightDirection, lightDirection)
-
   // インデックスを用いた描画命令
-  gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0)
+  gl.drawElements(gl.TRIANGLES, data.length, gl.UNSIGNED_SHORT, 0)
 }
 
 /**
@@ -155,9 +185,14 @@ const draw = () => {
   // canvasを初期化
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 
+  // カウンタをインクリメント
+  count++
+  // カウンタを元にラジアンを算出
+  const rad = ((count % 360) * Math.PI) / 180
+
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
-    new Float32Vector3(0.0, 0.0, 5.0), // 三次元空間を映し出すカメラを置く
+    new Float32Vector3(0.0, 0.0, 10.0), // 三次元空間を映し出すカメラを置く
     new Float32Vector3(0.0, 0.0, 0.0), // 原点を注視点として見つめる
     new Float32Vector3(0.0, 1.0, 0.0) // カメラの上方向は Y 軸の方向に指定
   ).mulByMatrix4x4(rotationByMouse)
@@ -169,23 +204,73 @@ const draw = () => {
   gl.bindTexture(gl.TEXTURE_2D, texture)
   gl.uniform1i(program.uTexture, 0)
 
+  /* トーラス（シルエット） -------------------------------- */
+
   // ステンシルテストを有効にする
   gl.enable(gl.STENCIL_TEST)
 
+  // カラーと深度をマスク
+  gl.colorMask(false, false, false, false)
+  gl.depthMask(false)
+
+  // ステンシル設定
   gl.stencilFunc(gl.ALWAYS, 1, ~0)
   gl.stencilOp(gl.KEEP, gl.REPLACE, gl.REPLACE)
-  drawSquare(-0.25, 0.25, -0.5)
 
-  gl.stencilFunc(gl.ALWAYS, 0, ~0)
-  gl.stencilOp(gl.KEEP, gl.INCR, gl.INCR)
-  drawSquare(0.0, 0.0, 0.0)
+  // 使用フラグ設定
+  gl.uniform1i(program.uIsUseLight, false)
+  gl.uniform1i(program.uIsUseTexture, false)
+  gl.uniform1i(program.uIsDrawOutline, true)
 
-  gl.stencilFunc(gl.EQUAL, 2, ~0)
+  // モデル座標変換行列の生成
+  const torusRotateAxis = new Float32Vector3(0.0, 1.0, 1.0).normalize()
+  const mMatrixTorus = Matrix4x4.identity().rotateAround(torusRotateAxis, rad)
+
+  // 描画
+  drawShape(torusBuffer, mMatrixTorus)
+
+  /* 球体 ----------------------------------------- */
+
+  // カラーと深度のマスクを解除
+  gl.colorMask(true, true, true, true)
+  gl.depthMask(true)
+
+  // ステンシル設定
+  gl.stencilFunc(gl.EQUAL, 0, ~0)
   gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP)
-  drawSquare(0.25, -0.25, 0.5)
+
+  // 使用フラグ設定
+  gl.uniform1i(program.uIsUseLight, false)
+  gl.uniform1i(program.uIsUseTexture, true)
+  gl.uniform1i(program.uIsDrawOutline, false)
+
+  // モデル座標変換行列の生成
+  const mMatrixSphere = Matrix4x4.identity().scale(50.0, 50.0, 50.0)
+
+  // 描画
+  drawShape(sphereBuffer, mMatrixSphere)
+
+  /* トーラス --------------------------------------- */
 
   // ステンシルテストを無効にする
   gl.disable(gl.STENCIL_TEST)
+
+  // モデルの逆行列
+  const mInvMatrixTorus = mMatrixTorus.inverse()
+  gl.uniformMatrix4fv(program.uMInvMatrix, false, mInvMatrixTorus.values)
+
+  // 平行光源の向き
+  gl.uniform3fv(program.uLightDirection, lightDirection)
+
+  // 使用フラグ設定
+  gl.uniform1i(program.uIsUseLight, true)
+  gl.uniform1i(program.uIsUseTexture, false)
+  gl.uniform1i(program.uIsDrawOutline, false)
+
+  // 描画
+  drawShape(torusBuffer, mMatrixTorus)
+
+  /* -------------------------------------------- */
 
   // コンテキストの再描画
   // 画面上にレンダリングされたモデルを描画するためには、コンテキストをリフレッシュする必要がある
