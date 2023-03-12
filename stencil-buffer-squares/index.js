@@ -26,8 +26,6 @@ let rotationByMouse = Matrix4x4.identity()
 // ライトベクトル
 const lightDirection = [1.0, 1.0, 1.0]
 
-let count = 0
-
 /**
  * イベントから取得したマウス座標をもとに回転軸ベクトルと回転角を割り出し、
  * クォータニオンを更新する関数
@@ -156,12 +154,6 @@ const drawSquare = (tx, ty, tz) => {
 const draw = () => {
   // canvasを初期化
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
-
-  // カウンタをインクリメント
-  count++
-
-  // カウンタを元にラジアンを算出
-  const rad = ((count % 360) * Math.PI) / 180
 
   // ビュー座標変換行列
   const vMatrix = Matrix4x4.lookAt(
