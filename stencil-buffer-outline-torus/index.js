@@ -299,7 +299,7 @@ const init = async () => {
   gl = utils.getGLContext(canvas, { stencil: true })
 
   // canvasを初期化する色を設定する
-  gl.clearColor(0.0, 0.7, 0.7, 1.0)
+  gl.clearColor(0.0, 0.0, 0.0, 1.0)
   // canvasを初期化する際の深度を設定する
   gl.clearDepth(1.0)
   //
