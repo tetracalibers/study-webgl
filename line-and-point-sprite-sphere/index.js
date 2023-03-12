@@ -1,4 +1,4 @@
-// @see https://wgld.org/d/webgl/w036.html
+// @see https://wgld.org/d/webgl/w037.html
 
 import { utils } from '../common/js/utils.js'
 import { Matrix4x4 } from '../common/js/dist/matrix.js'
@@ -12,6 +12,8 @@ let canvas = null
 let gl = null
 /** @type {WebGLProgram | null} */
 let program = null
+/** @type {WebGLTexture | null} */
+let texture = null
 
 /** @type {Matrix4x4} */
 let pMatrix
@@ -66,7 +68,7 @@ const initControls = () => {
     'point size [px]': {
       value: pointSize,
       min: 1,
-      max: 10,
+      max: 32,
       step: 0.1,
       onChange: (v) => (pointSize = v)
     },
@@ -92,6 +94,8 @@ const initProgram = async () => {
 
   program.uMvpMatrix = gl.getUniformLocation(program, 'u_mvpMatrix')
   program.uPointSize = gl.getUniformLocation(program, 'u_pointSize')
+  program.uTexture = gl.getUniformLocation(program, 'u_texture')
+  program.uIsUseTexture = gl.getUniformLocation(program, 'u_isUseTexture')
 
   gl.useProgram(program)
 }
@@ -99,7 +103,7 @@ const initProgram = async () => {
 /**
  * バッファを準備する関数
  */
-const initBuffers = () => {
+const initBuffers = async () => {
   /* 球状に並んだ点 ------------------------------------ */
 
   const sphereData = sphere(16, 16, 2.0)
@@ -132,6 +136,9 @@ const initBuffers = () => {
     near: 0.1, // ニアクリップ
     far: 100 // ファークリップ
   })
+
+  // テクスチャを生成
+  texture = await utils.getTexture(gl, './img/tetra-128x128_ts.png')
 }
 
 /**
@@ -189,15 +196,32 @@ const draw = () => {
   // 点のサイズを送る
   gl.uniform1f(program.uPointSize, pointSize)
 
+  // ポイントスプライトに設定するテクスチャをバインド
+  gl.activeTexture(gl.TEXTURE0)
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+
+  /* 球 ------------------------------------------ */
+
+  // テクスチャを使う
+  gl.uniform1i(program.uTexture, 0)
+  gl.uniform1i(program.uIsUseTexture, true)
+
   // 球を描画
   const mMatrixSphere = Matrix4x4.identity().rotateY(rad)
   drawShape(sphereBuffer, mMatrixSphere, 'POINTS')
+
+  /* 線 ------------------------------------------ */
+
+  // テクスチャを使わない
+  gl.uniform1i(program.uIsUseTexture, false)
 
   // 線を描画
   const mMatrixLine = Matrix4x4.identity()
     .rotateX(Math.PI / 2)
     .scale(3.0, 3.0, 1.0)
   drawShape(lineBuffer, mMatrixLine, linePrimitiveType)
+
+  /* -------------------------------------------- */
 
   // コンテキストの再描画
   // 画面上にレンダリングされたモデルを描画するためには、コンテキストをリフレッシュする必要がある
@@ -234,13 +258,18 @@ const init = async () => {
   gl.enable(gl.DEPTH_TEST)
   gl.depthFunc(gl.LEQUAL)
 
+  // ブレンディングを有効にする
+  gl.enable(gl.BLEND)
+  // ブレンドファクター
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE)
+
   // 点の最大ピクセル数をコンソールに表示
   const [minPointSize, maxPointSize] = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)
   console.log('pointSizeRange:', minPointSize, 'to', maxPointSize)
 
   // 適切な順序で関数を呼び出す
   await initProgram()
-  initBuffers()
+  await initBuffers()
   render()
 
   initControls()
