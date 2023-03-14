@@ -183,3 +183,121 @@ export const sphere = (crossSectionVerticesCount, pipeDivisitionsCount, radius, 
     index: idxs
   }
 }
+
+/**
+ * 立方体の頂点データを生成する関数
+ *
+ * @param {number} side - 辺の長さ
+ * @param {number[]} color - RGBA色
+ */
+export const cube = (side, color) => {
+  const half = side * 0.5
+  const positions = [
+    -half,
+    -half,
+    half,
+    half,
+    -half,
+    half,
+    half,
+    half,
+    half,
+    -half,
+    half,
+    half,
+    -half,
+    -half,
+    -half,
+    -half,
+    half,
+    -half,
+    half,
+    half,
+    -half,
+    half,
+    -half,
+    -half,
+    -half,
+    half,
+    -half,
+    -half,
+    half,
+    half,
+    half,
+    half,
+    half,
+    half,
+    half,
+    -half,
+    -half,
+    -half,
+    -half,
+    half,
+    -half,
+    -half,
+    half,
+    -half,
+    half,
+    -half,
+    -half,
+    half,
+    half,
+    -half,
+    -half,
+    half,
+    half,
+    -half,
+    half,
+    half,
+    half,
+    half,
+    -half,
+    half,
+    -half,
+    -half,
+    -half,
+    -half,
+    -half,
+    half,
+    -half,
+    half,
+    half,
+    -half,
+    half,
+    -half
+  ]
+
+  const normals = [
+    -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0,
+    -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+    -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0,
+    1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0,
+    -1.0, 1.0, -1.0
+  ]
+
+  const row = positions.length / 3
+  let colors = []
+  for (let i = 0; i < row; i++) {
+    const color_i = color ? color : hsvaToRgba((360 / row) * i, 1, 1, 1)
+    colors.push(...color_i)
+  }
+
+  const texCoords = [
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
+  ]
+
+  const index = [
+    0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16,
+    18, 19, 20, 21, 22, 20, 22, 23
+  ]
+
+  return {
+    positions,
+    normals,
+    colors,
+    texCoords,
+    index
+  }
+}
