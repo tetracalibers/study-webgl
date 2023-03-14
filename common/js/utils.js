@@ -254,9 +254,10 @@ const getFrameBuffer = (gl, width, height) => {
  *
  * @param {WebGL2RenderingContext} gl
  * @param {string} source
+ * @param {() => void} setParams
  * @return {Promise<WebGLTexture | null>}
  */
-const getTexture = (gl, source) => {
+const getTexture = (gl, source, setParams) => {
   const img = new Image()
 
   const _makeTexture = (img) => {
@@ -268,6 +269,8 @@ const getTexture = (gl, source) => {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
     // ミップマップを生成
     gl.generateMipmap(gl.TEXTURE_2D)
+    // テクスチャパラメータの設定
+    setParams && setParams()
     // テクスチャのバインドを無効化
     gl.bindTexture(gl.TEXTURE_2D, null)
     // 生成したテクスチャを返す
