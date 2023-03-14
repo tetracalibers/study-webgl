@@ -21,19 +21,12 @@ void main() {
     vec3 invLight = normalize(u_mInvMatrix * vec4(u_lightDirection, 0.0)).xyz;
     // ライト係数
     // 0.1 <= dot <= 1.0 の範囲にclamp
-    float diffuse = clamp(dot(a_normal, invLight), 0.1, 1.0);
-    v_Color = a_color * vec4(vec3(diffuse), 1.0);
+    float diffuse = clamp(dot(a_normal, invLight), 0.2, 1.0);
+    v_Color = vec4(a_color.xyz * vec3(diffuse), 1.0);
   } else {
     v_Color = a_color;
   }
   
   v_TextureCoord = a_textureCoord;
-  
-  vec3 outlinePosition = a_position;
-  
-  if (u_isDrawOutline) {
-    outlinePosition += a_normal * 0.1;
-  }
-  
-  gl_Position = u_mvpMatrix * vec4(outlinePosition, 1.0);
+  gl_Position = u_mvpMatrix * vec4(a_position, 1.0);
 }
